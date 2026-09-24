@@ -23,3 +23,19 @@ export function shuffle<T>(items: T[], rng: Rng): T[] {
   }
   return a
 }
+
+/** Lv2 の問題。盤面に見本と同じ字が2〜4個あり、残りは紛らわし字 */
+export type BoardQuestion = {
+  target: string
+  board: string[]
+}
+
+/** 盤面を埋める紛らわし字は、似ている順の上位からこの数の中で選ぶ（重複あり） */
+const BOARD_DISTRACTOR_POOL = 6
+
+export function createBoard(data: KanjiData, target: string, size: number, rng: Rng): BoardQuestion {
+  const copies = 2 + Math.floor(rng() * 3)
+  const pool = data.kanji[target].distractors.slice(0, BOARD_DISTRACTOR_POOL)
+  const fillers = Array.from({ length: size - copies }, () => pool[Math.floor(rng() * pool.length)])
+  return { target, board: shuffle([...Array<string>(copies).fill(target), ...fillers], rng) }
+}

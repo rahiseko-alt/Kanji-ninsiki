@@ -3,10 +3,12 @@ import { loadRecord, saveRecord } from './storage.ts'
 import { loadSettings, saveSettings, type Settings } from './settings.ts'
 import { messages, MessagesContext } from './i18n.tsx'
 import { PracticeScreen } from './screens/PracticeScreen.tsx'
+import { BoardScreen } from './screens/BoardScreen.tsx'
+import { StageSwitch } from './screens/StageSwitch.tsx'
 import { ResultScreen } from './screens/ResultScreen.tsx'
 import { RecordsScreen } from './screens/RecordsScreen.tsx'
 import { CreditsScreen } from './screens/CreditsScreen.tsx'
-import { initialRecord, type PracticeRecord, type SessionResult } from './practice/practice.ts'
+import { initialRecord, type PracticeRecord, type SessionResult, type Stage } from './practice/practice.ts'
 
 type Screen = 'practice' | 'records' | 'credits'
 
@@ -38,6 +40,13 @@ export function App() {
     if (next !== screen && result) setShowResult(true)
     setScreen(next)
   }
+
+  // 段階を切り替えると、進行中の練習回の結果は出さずに閉じる（記録は段階ごとに残っている）
+  const chooseStage = (stage: Stage) => {
+    clearResult()
+    updateSettings({ ...settings, stage })
+  }
+  const Practice = settings.stage === 'lv2' ? BoardScreen : PracticeScreen
 
   const tabs: [Screen, string][] = [
     ['practice', m.navPractice],
@@ -79,15 +88,21 @@ export function App() {
               {m.introOk}
             </button>
           </main>
-        ) : result && showResult ? (
-          <ResultScreen result={result} onContinue={clearResult} />
         ) : (
-          <PracticeScreen
-            record={record}
-            onRecord={updateRecord}
-            onSessionResult={setResult}
-            onShowResult={openResult}
-          />
+          <>
+            <StageSwitch stage={settings.stage} onChange={chooseStage} />
+            {result && showResult ? (
+              <ResultScreen result={result} onContinue={clearResult} />
+            ) : (
+              <Practice
+                key={settings.stage}
+                record={record}
+                onRecord={updateRecord}
+                onSessionResult={setResult}
+                onShowResult={openResult}
+              />
+            )}
+          </>
         )}
       </div>
     </MessagesContext.Provider>
