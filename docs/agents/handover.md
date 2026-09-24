@@ -8,6 +8,26 @@
 
 ---
 
+## 2026-09-24 最初の版を main に取り込み
+
+**決めたこと**
+
+- rahiseko-alt/Kanji-ninsiki#1 を main に取り込んだ。作業指示書 #3〜#9 は自動で閉じた。仕様書 #2 は開いたまま
+- README の冒頭をこのアプリの説明に書き換えた
+
+**次にやること**
+
+- 利用者が GitHub の Settings → Pages → Source を「GitHub Actions」にする。
+  その後 Actions の「Deploy to GitHub Pages」を再実行（または main に何か取り込む）すると公開される
+- 公開URLを留学生数名に渡し、1週間使ってもらう。記録画面の平均時間の移り変わりで効果を確かめる
+- 次の機能（Lv2 など）に進むなら `/grill-with-docs` から
+
+**未解決の問題**
+
+- Pages 未設定のまま取り込んだため、初回の公開処理は失敗している可能性が高い（設定後に再実行が要る）
+- 実機（iPhone・Android）での表示とホーム画面への追加は未確認
+- KanjiVG 由来の類似度データに CC BY-SA が及ぶかは【曖昧】のまま
+
 ## 2026-09-24 最初の版（Lv1）を実装し、点検の指摘も修正
 
 **決めたこと**
@@ -79,27 +99,4 @@
 **未解決の問題**
 
 - KanjiVG 由来の類似度データに CC BY-SA が及ぶかは【曖昧】のまま（`docs/adr/0001` 参照）
-
-## 2026-09-24 作るものの下調べと、使えるデータの取り込み
-
-**決めたこと**
-
-- 作るもの（案）: 外国人学習者向けに、読み・意味は教えず「漢字の形を見分ける力」だけを鍛える学校用アプリ。
-  出発点はChatGPTの調査 https://chatgpt.com/share/6ab59385-da20-83e9-abfa-df570e8a28ec（段階案 Lv1〜Lv5）
-- 既存OSSを並列で調べ、`docs/research/` に調査書5本を置いた。公開条件が確認できたデータだけ `third_party/` に取り込んだ
-- Kakugo（GPL）とKanji Guesser（公開条件なし）はコードもデータも写さない。仕組みだけ調査書に記録
-- similar-kanji の中心データ（似た字の一覧）は元サイトが無断転載禁止のため取り込んでいない。
-  代わりの候補は kanjidist-visualiser（MIT）の類似度データ
-
-**次にやること**
-
-- `/grill-with-docs` で作るものを確定する。調査書 `docs/research/*.md` を材料にする
-- 聞き取りで決める点: 似た字データをどれにするか（kanjidist-visualiser／Lars Yencken の人手評価 CC BY 3.0／similar-kanji作者への問い合わせ）、
-  KanjiVG由来データの継承条件（CC BY-SA）をどう扱うか、Lv3（一瞬表示）の新設計
-- 決まったら `/to-spec` → `/to-tickets` → `/implement`
-
-**未解決の問題**
-
-- kanjidist-visualiser の一部の数値や topokanji の部品データは、元データの公開条件が及ぶか【曖昧】
-- 公開条件の判断はすべて調査担当の読解によるもので、専門家の確認は受けていない
 
