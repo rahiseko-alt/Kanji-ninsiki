@@ -72,3 +72,45 @@ describe('練習記録の読み戻し', () => {
     }
   })
 })
+
+describe('取り違え', () => {
+  /** 最初の問題だけ、指定した字を選んで取り違える */
+  function mistakeThenCorrect(seed: number, pickedOf: (q: { target: string; choices: string[] }) => string) {
+    const rng = seededRng(seed)
+    let record = initialRecord()
+    const q = nextQuestion(record, testData, rng)
+    const picked = pickedOf(q)
+    record = answer(record, testData, q, picked, 1000).record
+    const targets: string[] = []
+    for (let i = 0; i < 3; i++) {
+      const next = nextQuestion(record, testData, rng)
+      targets.push(next.target)
+      record = answer(record, testData, next, next.target, 1000).record
+    }
+    return { target: q.target, picked, targets, record }
+  }
+
+  it('取り違えた2字が、次の3問以内にどちらも見本として出る', () => {
+    for (let seed = 0; seed < 30; seed++) {
+      const r = mistakeThenCorrect(seed, (q) => q.choices.find((c) => c !== q.target)!)
+      expect(r.targets, `seed ${seed}`).toContain(r.target)
+      expect(r.targets, `seed ${seed}`).toContain(r.picked)
+    }
+  })
+
+  it('選んだ字が学習中の字でなくても再出題するが、学習中の字には加えない', () => {
+    const outside = testData.order[10] // 学習中の8字の外
+    const r = mistakeThenCorrect(2, () => outside)
+    expect(r.targets).toContain(outside)
+    expect(r.record.learningCount).toBe(8)
+  })
+
+  it('再出題待ちは練習記録に残り、読み戻しても保たれる', () => {
+    const rng = seededRng(4)
+    const q = nextQuestion(initialRecord(), testData, rng)
+    const { record } = answer(initialRecord(), testData, q, q.choices.find((c) => c !== q.target)!, 900)
+    expect(restoreRecord(JSON.parse(JSON.stringify(record)))).toEqual(record)
+    const again = nextQuestion(restoreRecord(JSON.parse(JSON.stringify(record))), testData, seededRng(9))
+    expect(again.target).not.toBe(q.target) // 直前の見本は続けて出さない
+  })
+})

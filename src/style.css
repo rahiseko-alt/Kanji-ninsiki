@@ -66,3 +66,16 @@ body { margin: 0; background: var(--bg); color: var(--fg); }
 }
 .result { max-width: 560px; margin: 0 auto; padding: 48px 16px; text-align: center; }
 .result .score { font-size: 56px; margin: 16px 0; }
+.compare { display: flex; justify-content: center; gap: 16px; margin-bottom: 16px; }
+.compare figure { margin: 0; }
+.compare-char {
+  font-size: clamp(72px, 24vw, 120px);
+  line-height: 1.2;
+  width: clamp(120px, 38vw, 180px);
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: 14px;
+}
+.compare-char.is-correct { border-color: var(--ok); }
+.compare-char.is-wrong { border-color: var(--ng); }
+.compare figcaption { font-size: 15px; margin-top: 6px; }

@@ -17,6 +17,8 @@ export type PracticeRecord = {
   stats: Record<string, KanjiStats>
   /** 直近の見本（新しい順） */
   recentTargets: string[]
+  /** 取り違えて、近いうちに見本として出す字（先頭ほど先に出す） */
+  pendingReview: string[]
   /** 進行中の練習回の回答 */
   currentSession: { correct: boolean; ms: number }[]
   /** 終わった練習回 */
@@ -29,14 +31,18 @@ export function initialRecord(): PracticeRecord {
     choiceCount: 4,
     stats: {},
     recentTargets: [],
+    pendingReview: [],
     currentSession: [],
     sessions: [],
   }
 }
 
 export function nextQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): Question {
-  const learning = data.order.slice(0, record.learningCount)
   const recent = record.recentTargets.slice(0, RECENT_EXCLUDED)
+  const review = record.pendingReview.find((c) => !recent.includes(c) && c in data.kanji)
+  if (review) return createQuestion(data, review, record.choiceCount, rng)
+
+  const learning = data.order.slice(0, record.learningCount)
   const candidates = learning.filter((c) => !recent.includes(c))
   const target = weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
   return createQuestion(data, target, record.choiceCount, rng)
@@ -81,6 +87,7 @@ export function answer(
       [question.target]: { seen: prev.seen + 1, correct: prev.correct + (correct ? 1 : 0) },
     },
     recentTargets: [question.target, ...record.recentTargets].slice(0, RECENT_EXCLUDED),
+    pendingReview: nextPendingReview(record.pendingReview, question.target, picked, correct),
     currentSession: [...record.currentSession, { correct, ms }],
   }
   if (next.currentSession.length < QUESTIONS_PER_SESSION) return { record: next, correct }
@@ -95,6 +102,16 @@ export function answer(
   return { record: next, correct, sessionResult }
 }
 
+/**
+ * 見本として出した字は待ちから外す。取り違えたら、選んだ字を先に、見本を後に加える
+ * （見本は直前2問に出せないので、選んだ字 → 別の字 → 見本 の順で3問以内に収まる）
+ */
+function nextPendingReview(pending: string[], target: string, picked: string, correct: boolean): string[] {
+  const rest = pending.filter((c) => c !== target)
+  if (correct) return rest
+  return [...rest.filter((c) => c !== picked), picked, target]
+}
+
 /** 保存しておいた記録を読み戻す。形が崩れていれば初期状態を返す */
 export function restoreRecord(saved: unknown): PracticeRecord {
   if (!isRecord(saved)) return initialRecord()
@@ -104,6 +121,7 @@ export function restoreRecord(saved: unknown): PracticeRecord {
     choiceCount: r.choiceCount,
     stats: r.stats,
     recentTargets: r.recentTargets,
+    pendingReview: r.pendingReview,
     currentSession: r.currentSession,
     sessions: r.sessions,
   }
@@ -123,6 +141,7 @@ function isRecord(v: unknown): boolean {
     isObject(v.stats) &&
     Object.values(v.stats).every((s) => isObject(s) && isCount(s.seen) && isCount(s.correct)) &&
     isArrayOf(v.recentTargets, (x) => typeof x === 'string') &&
+    isArrayOf(v.pendingReview, (x) => typeof x === 'string') &&
     isArrayOf(v.currentSession, (x) => isObject(x) && typeof x.correct === 'boolean' && typeof x.ms === 'number') &&
     isArrayOf(
       v.sessions,

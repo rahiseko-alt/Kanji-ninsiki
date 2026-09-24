@@ -102,6 +102,20 @@ export function PracticeScreen({ record, onRecord, onSessionEnd }: Props) {
       </div>
       {answered && !correct && (
         <div className="feedback">
+          <div className="compare">
+            <figure>
+              <div className="compare-char is-correct" lang="ja">
+                {question.target}
+              </div>
+              <figcaption>Correct</figcaption>
+            </figure>
+            <figure>
+              <div className="compare-char is-wrong" lang="ja">
+                {picked}
+              </div>
+              <figcaption>Your choice</figcaption>
+            </figure>
+          </div>
           <button className="next" onClick={goNext}>
             Next
           </button>
