@@ -12,7 +12,12 @@ const STREAK_TO_RAISE = 5
 const CORRECT_TO_GROW = 9
 const GROW_BY = 2
 
-export type KanjiStats = { seen: number; correct: number }
+export type KanjiStats = {
+  seen: number
+  correct: number
+  /** 直近の回答時間（ms）。以前の記録には無い */
+  lastMs?: number
+}
 
 export type SessionResult = { correct: number; total: number; averageMs: number }
 
@@ -93,7 +98,7 @@ export function answer(
     ...record,
     stats: {
       ...record.stats,
-      [question.target]: { seen: prev.seen + 1, correct: prev.correct + (correct ? 1 : 0) },
+      [question.target]: { seen: prev.seen + 1, correct: prev.correct + (correct ? 1 : 0), lastMs: ms },
     },
     recentTargets: [question.target, ...record.recentTargets].slice(0, RECENT_EXCLUDED),
     pendingReview: nextPendingReview(record.pendingReview, question.target, picked, correct),
@@ -118,21 +123,22 @@ export function answer(
 
 /** 連続正解で1段上げ、取り違えで1段下げる。段が変わったら数え直す */
 function nextChoiceCount(record: PracticeRecord, correct: boolean): Pick<PracticeRecord, 'choiceCount' | 'streak'> {
-  const level = CHOICE_COUNTS.indexOf(record.choiceCount)
-  if (!correct) return { choiceCount: CHOICE_COUNTS[Math.max(level - 1, 0)], streak: 0 }
+  const choiceStep = CHOICE_COUNTS.indexOf(record.choiceCount)
+  if (!correct) return { choiceCount: CHOICE_COUNTS[Math.max(choiceStep - 1, 0)], streak: 0 }
   const streak = record.streak + 1
   if (streak < STREAK_TO_RAISE) return { choiceCount: record.choiceCount, streak }
-  return { choiceCount: CHOICE_COUNTS[Math.min(level + 1, CHOICE_COUNTS.length - 1)], streak: 0 }
+  return { choiceCount: CHOICE_COUNTS[Math.min(choiceStep + 1, CHOICE_COUNTS.length - 1)], streak: 0 }
 }
 
 /**
- * 見本として出した字は待ちから外す。取り違えたら、選んだ字を先に、見本を後に加える
- * （見本は直前2問に出せないので、選んだ字 → 別の字 → 見本 の順で3問以内に収まる）
+ * 見本として出した字は待ちから外す。取り違えたら、選んだ字・見本の順で待ちの先頭に置き、
+ * それより前の待ちはその後ろに回す。最新の取り違えを優先するので、続けて取り違えても
+ * 選んだ字 → 別の字 → 見本 の順で3問以内に収まる（見本は直前2問に出せないため）
  */
 function nextPendingReview(pending: string[], target: string, picked: string, correct: boolean): string[] {
   const rest = pending.filter((c) => c !== target)
   if (correct) return rest
-  return [...rest.filter((c) => c !== picked), picked, target]
+  return [picked, target, ...rest.filter((c) => c !== picked)]
 }
 
 /** 保存しておいた記録を読み戻す。形が崩れていれば初期状態を返す */
@@ -164,13 +170,25 @@ function isRecord(v: unknown): boolean {
     CHOICE_COUNTS.includes(v.choiceCount as number) &&
     isCount(v.streak) &&
     isObject(v.stats) &&
-    Object.values(v.stats).every((s) => isObject(s) && isCount(s.seen) && isCount(s.correct)) &&
+    Object.values(v.stats).every(
+      (s) =>
+        isObject(s) &&
+        isCount(s.seen) &&
+        isCount(s.correct) &&
+        (s.lastMs === undefined || typeof s.lastMs === 'number'),
+    ) &&
     isArrayOf(v.recentTargets, (x) => typeof x === 'string') &&
     isArrayOf(v.pendingReview, (x) => typeof x === 'string') &&
     isArrayOf(v.currentSession, (x) => isObject(x) && typeof x.correct === 'boolean' && typeof x.ms === 'number') &&
     isArrayOf(
       v.sessions,
-      (x) => isObject(x) && isCount(x.correct) && isCount(x.total) && typeof x.averageMs === 'number',
+      (x) =>
+        isObject(x) &&
+        isCount(x.correct) &&
+        isCount(x.total) &&
+        (x.total as number) >= 1 &&
+        (x.correct as number) <= (x.total as number) &&
+        typeof x.averageMs === 'number',
     )
   )
 }

@@ -70,12 +70,38 @@ describe('練習記録の読み戻し', () => {
     for (const broken of [null, undefined, 'x', 42, [], { learningCount: 'many' }, { stats: 3 }]) {
       expect(restoreRecord(broken)).toEqual(initialRecord())
     }
+    const good = JSON.parse(JSON.stringify(play(initialRecord(), 10, () => true).record))
+    for (const session of [
+      { correct: 0, total: 0, averageMs: 0 },
+      { correct: 5, total: 3, averageMs: 1000 },
+    ]) {
+      const broken = { ...good, sessions: [session] }
+      expect(restoreRecord(broken)).toEqual(initialRecord())
+    }
+    const badStats = { ...good, stats: { 一: { seen: 1, correct: 1, lastMs: 'fast' } } }
+    expect(restoreRecord(badStats)).toEqual(initialRecord())
+  })
+
+  it('直近の回答時間を持たない以前の記録も読み戻せる', () => {
+    const old = { ...initialRecord(), stats: { 一: { seen: 2, correct: 1 } } }
+    expect(restoreRecord(old)).toEqual(old)
+  })
+})
+
+describe('字ごとの記録', () => {
+  it('見本ごとに出た回数・正解数・直近の回答時間が残る', () => {
+    let record = initialRecord()
+    const q = nextQuestion(record, testData, seededRng(7))
+    record = answer(record, testData, q, q.target, 1500).record
+    expect(record.stats[q.target]).toEqual({ seen: 1, correct: 1, lastMs: 1500 })
+    record = answer(record, testData, q, q.choices.find((c) => c !== q.target)!, 2500).record
+    expect(record.stats[q.target]).toEqual({ seen: 2, correct: 1, lastMs: 2500 })
   })
 })
 
 describe('取り違え', () => {
   /** 最初の問題だけ、指定した字を選んで取り違える */
-  function mistakeThenCorrect(seed: number, pickedOf: (q: { target: string; choices: string[] }) => string) {
+  function mixUpThenCorrect(seed: number, pickedOf: (q: { target: string; choices: string[] }) => string) {
     const rng = seededRng(seed)
     let record = initialRecord()
     const q = nextQuestion(record, testData, rng)
@@ -92,7 +118,7 @@ describe('取り違え', () => {
 
   it('取り違えた2字が、次の3問以内にどちらも見本として出る', () => {
     for (let seed = 0; seed < 30; seed++) {
-      const r = mistakeThenCorrect(seed, (q) => q.choices.find((c) => c !== q.target)!)
+      const r = mixUpThenCorrect(seed, (q) => q.choices.find((c) => c !== q.target)!)
       expect(r.targets, `seed ${seed}`).toContain(r.target)
       expect(r.targets, `seed ${seed}`).toContain(r.picked)
     }
@@ -100,9 +126,35 @@ describe('取り違え', () => {
 
   it('選んだ字が学習中の字でなくても再出題するが、学習中の字には加えない', () => {
     const outside = testData.order[10] // 学習中の8字の外
-    const r = mistakeThenCorrect(2, () => outside)
+    const r = mixUpThenCorrect(2, () => outside)
     expect(r.targets).toContain(outside)
     expect(r.record.learningCount).toBe(8)
+  })
+
+  it('続けて取り違えても、最後の取り違えの2字が次の3問以内に出て、待ちの字はすべていずれ出る', () => {
+    for (let seed = 0; seed < 30; seed++) {
+      const rng = seededRng(seed)
+      let record = initialRecord()
+      const everPending = new Set<string>()
+      let last = { target: '', picked: '' }
+      for (let i = 0; i < 4; i++) {
+        const q = nextQuestion(record, testData, rng)
+        const picked = q.choices.find((c) => c !== q.target)!
+        record = answer(record, testData, q, picked, 1000).record
+        everPending.add(q.target).add(picked)
+        last = { target: q.target, picked }
+      }
+      const targets: string[] = []
+      for (let i = 0; i < 12; i++) {
+        const q = nextQuestion(record, testData, rng)
+        targets.push(q.target)
+        record = answer(record, testData, q, q.target, 1000).record
+      }
+      expect(targets.slice(0, 3), `seed ${seed}`).toContain(last.target)
+      expect(targets.slice(0, 3), `seed ${seed}`).toContain(last.picked)
+      for (const c of everPending) expect(targets, `seed ${seed} ${c}`).toContain(c)
+      expect(record.pendingReview, `seed ${seed}`).toEqual([])
+    }
   })
 
   it('再出題待ちは練習記録に残り、読み戻しても保たれる', () => {
