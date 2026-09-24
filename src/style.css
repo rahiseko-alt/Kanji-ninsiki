@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'Noto Sans JP';
+  src: url('./assets/fonts/NotoSansJP-subset.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
 :root {
   --bg: #f7f7f5;
   --fg: #1d1d1b;
@@ -22,7 +28,7 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--fg); }
-[lang='ja'] { font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif; }
+[lang='ja'] { font-family: 'Noto Sans JP', sans-serif; }
 .practice { max-width: 560px; margin: 0 auto; padding: 24px 16px; text-align: center; }
 .target {
   font-size: clamp(96px, 30vw, 160px);

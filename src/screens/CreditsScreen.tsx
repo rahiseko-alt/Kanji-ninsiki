@@ -33,6 +33,12 @@ const credits: Credit[] = [
     license: 'MIT',
     note: 'List of the 2,136 jōyō kanji.',
   },
+  {
+    name: 'Noto Sans JP © Adobe (Reserved Font Name: Source)',
+    url: 'https://github.com/google/fonts/tree/main/ofl/notosansjp',
+    license: 'SIL Open Font License 1.1',
+    note: 'Subset to the characters used in this app (modified version).',
+  },
 ]
 
 export function CreditsScreen() {
