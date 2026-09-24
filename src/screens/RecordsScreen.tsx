@@ -5,11 +5,11 @@ import { useMessages } from '../i18n.tsx'
 import { kanjiData } from '../kanjiData.ts'
 import { formatSeconds } from '../format.ts'
 
-type Props = { record: PracticeRecord; onReset: () => void }
+type Props = { record: PracticeRecord; initialStage: Stage; onReset: () => void }
 
-export function RecordsScreen({ record, onReset }: Props) {
+export function RecordsScreen({ record, initialStage, onReset }: Props) {
   const m = useMessages()
-  const [stage, setStage] = useState<Stage>('lv1')
+  const [stage, setStage] = useState<Stage>(initialStage)
   const sessions = progressOf(record, stage).sessions
   return (
     <main className="records">

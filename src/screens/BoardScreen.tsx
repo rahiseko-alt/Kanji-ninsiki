@@ -72,10 +72,12 @@ export function BoardScreen({ record, onRecord, onSessionResult, onShowResult }:
     return () => clearTimeout(id)
   }, [outcome, goNext])
 
-  // Enter／スペースで「できた」、答えたあとは次へ
+  // ボタンの外で Enter／スペースを押したら「できた」、答えたあとは次へ
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Enter' && e.key !== ' ') return
+      // ボタン（盤面の字・段階の切り替え）にいるときは、そのボタンを押す動きに任せる
+      if (e.target instanceof HTMLButtonElement) return
       e.preventDefault()
       if (answered) goNext()
       else submit()

@@ -41,9 +41,9 @@ export function App() {
     setScreen(next)
   }
 
-  // 段階を切り替えると、進行中の練習回の結果は出さずに閉じる（記録は段階ごとに残っている）
+  // 10問目のあとで段階を切り替えても、その練習回の結果画面を出す
   const chooseStage = (stage: Stage) => {
-    clearResult()
+    if (result) setShowResult(true)
     updateSettings({ ...settings, stage })
   }
   const Practice = settings.stage === 'lv2' ? BoardScreen : PracticeScreen
@@ -73,6 +73,7 @@ export function App() {
         {screen === 'records' ? (
           <RecordsScreen
             record={record}
+            initialStage={settings.stage}
             onReset={() => {
               updateRecord(initialRecord())
               clearResult()

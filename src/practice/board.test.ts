@@ -79,7 +79,7 @@ describe('Lv2 の採点', () => {
 
   it('字ごとの記録に残る', () => {
     const r = answerBoard(initialRecord(), testData, q, [0, 3], 1500)
-    expect(r.record.stats['三']).toEqual({ seen: 1, correct: 0, lastMs: 1500 })
+    expect(r.record.stats['三']).toEqual({ seen: 1, correct: 0, lastMs: 1500, missed: 1, mixedUp: 0 })
   })
 })
 
@@ -167,5 +167,32 @@ describe('記録の読み戻し（Lv2 追加後）', () => {
     expect(r.choiceCount).toBe(6)
     expect(r.sessions).toHaveLength(1)
     expect(r.lv2).toEqual(initialRecord().lv2)
+  })
+})
+
+describe('見落としと取り違えの記録', () => {
+  const q: BoardQuestion = { target: '三', board: ['三', '二', '一', '三', '四', '二', '五', '一', '三'] }
+
+  it('Lv2 の見落としと取り違えを、字ごとに別々に数える', () => {
+    let r = answerBoard(initialRecord(), testData, q, [0, 3], 1000).record
+    expect(r.stats['三']).toMatchObject({ missed: 1, mixedUp: 0 })
+    r = answerBoard(r, testData, q, [0, 3, 8, 1], 1000).record
+    expect(r.stats['三']).toMatchObject({ missed: 1, mixedUp: 1 })
+    r = answerBoard(r, testData, q, [0, 1], 1000).record
+    expect(r.stats['三']).toMatchObject({ missed: 2, mixedUp: 2 })
+  })
+
+  it('Lv1 で違う字を選んだら取り違えとして数える', () => {
+    const lv1 = { target: '三', choices: ['三', '二', '一', '四'] }
+    const r = answer(initialRecord(), testData, lv1, '二', 900).record
+    expect(r.stats['三']).toMatchObject({ missed: 0, mixedUp: 1 })
+  })
+
+  it('数を持たない以前の記録も読み戻せる', () => {
+    const r = answerBoard(initialRecord(), testData, q, [0, 3], 1000).record
+    const old = JSON.parse(JSON.stringify(r))
+    delete old.stats['三'].missed
+    delete old.stats['三'].mixedUp
+    expect(restoreRecord(old).stats['三']).toMatchObject({ seen: 1, correct: 0 })
   })
 })

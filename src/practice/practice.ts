@@ -19,6 +19,10 @@ export type KanjiStats = {
   correct: number
   /** 直近の回答時間（ms）。以前の記録には無い */
   lastMs?: number
+  /** 見落とした回数（Lv2）。以前の記録には無い */
+  missed?: number
+  /** 取り違えた回数。以前の記録には無い */
+  mixedUp?: number
 }
 
 export type SessionResult = { correct: number; total: number; averageMs: number }
@@ -129,7 +133,7 @@ export function answer(
   ms: number,
 ): AnswerOutcome {
   const correct = picked === question.target
-  return applyAnswer(record, data, 'lv1', question.target, correct, correct ? undefined : picked, ms)
+  return applyAnswer(record, data, 'lv1', question.target, { correct, missed: false, picked: correct ? undefined : picked }, ms)
 }
 
 export type BoardOutcome = AnswerOutcome & {
@@ -153,18 +157,26 @@ export function answerBoard(
     ...new Set(question.board.filter((c, i) => c !== question.target && chosen.has(i))),
   ]
   const correct = missed.length === 0 && wrongPicks.length === 0
-  const outcome = applyAnswer(record, data, 'lv2', question.target, correct, wrongPicks[0], ms)
+  const outcome = applyAnswer(
+    record,
+    data,
+    'lv2',
+    question.target,
+    { correct, missed: missed.length > 0, picked: wrongPicks[0] },
+    ms,
+  )
   return { ...outcome, missed, wrongPicks }
 }
 
-/** picked は取り違えて選んだ字。見落としだけのときは undefined */
+/** 1問の答えの中身。picked は取り違えて選んだ字（無ければ undefined） */
+type Judgement = { correct: boolean; missed: boolean; picked: string | undefined }
+
 function applyAnswer(
   record: PracticeRecord,
   data: KanjiData,
   stage: Stage,
   target: string,
-  correct: boolean,
-  picked: string | undefined,
+  { correct, missed, picked }: Judgement,
   ms: number,
 ): AnswerOutcome {
   const prev = record.stats[target] ?? { seen: 0, correct: 0 }
@@ -178,7 +190,13 @@ function applyAnswer(
     ...record,
     stats: {
       ...record.stats,
-      [target]: { seen: prev.seen + 1, correct: prev.correct + (correct ? 1 : 0), lastMs: ms },
+      [target]: {
+        seen: prev.seen + 1,
+        correct: prev.correct + (correct ? 1 : 0),
+        lastMs: ms,
+        missed: (prev.missed ?? 0) + (missed ? 1 : 0),
+        mixedUp: (prev.mixedUp ?? 0) + (picked !== undefined ? 1 : 0),
+      },
     },
     recentTargets: [target, ...record.recentTargets].slice(0, RECENT_EXCLUDED),
     pendingReview: nextPendingReview(record.pendingReview, target, picked, correct),
@@ -292,7 +310,9 @@ function isRecord(v: unknown): boolean {
         isObject(s) &&
         isCount(s.seen) &&
         isCount(s.correct) &&
-        (s.lastMs === undefined || typeof s.lastMs === 'number'),
+        (s.lastMs === undefined || typeof s.lastMs === 'number') &&
+        (s.missed === undefined || isCount(s.missed)) &&
+        (s.mixedUp === undefined || isCount(s.mixedUp)),
     ) &&
     isArrayOf(v.recentTargets, (x) => typeof x === 'string') &&
     isArrayOf(v.pendingReview, (x) => typeof x === 'string')
