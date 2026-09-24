@@ -1,27 +1,29 @@
 import type { PracticeRecord, SessionResult } from '../practice/practice.ts'
+import { useMessages } from '../i18n.tsx'
 
 type Props = { record: PracticeRecord; onReset: () => void }
 
 export function RecordsScreen({ record, onReset }: Props) {
+  const m = useMessages()
   const sessions = record.sessions
   return (
     <main className="records">
-      <h1>Your records</h1>
+      <h1>{m.recordsTitle}</h1>
       <p>
-        Kanji you are practicing: <strong>{record.learningCount}</strong>
+        {m.learningCount}: <strong>{record.learningCount}</strong>
       </p>
       {sessions.length === 0 ? (
-        <p className="empty">No sessions yet. Finish a 10-question session to see your progress.</p>
+        <p className="empty">{m.noSessions}</p>
       ) : (
         <>
           <TrendChart
-            title="Average time per question (seconds)"
+            title={m.chartTime}
             sessions={sessions}
             value={(s) => s.averageMs / 1000}
             format={(v) => v.toFixed(1)}
           />
           <TrendChart
-            title="Correct answers (%)"
+            title={m.chartCorrect}
             sessions={sessions}
             value={(s) => (s.correct / s.total) * 100}
             format={(v) => v.toFixed(0)}
@@ -30,9 +32,9 @@ export function RecordsScreen({ record, onReset }: Props) {
           <table className="session-table">
             <thead>
               <tr>
-                <th>Session</th>
-                <th>Correct</th>
-                <th>Average time</th>
+                <th>{m.session}</th>
+                <th>{m.correctCount}</th>
+                <th>{m.averageTime}</th>
               </tr>
             </thead>
             <tbody>
@@ -45,7 +47,9 @@ export function RecordsScreen({ record, onReset }: Props) {
                     <td>
                       {s.correct} / {s.total}
                     </td>
-                    <td>{(s.averageMs / 1000).toFixed(1)} s</td>
+                    <td>
+                      {(s.averageMs / 1000).toFixed(1)} {m.seconds}
+                    </td>
                   </tr>
                 ))}
             </tbody>
@@ -55,10 +59,10 @@ export function RecordsScreen({ record, onReset }: Props) {
       <button
         className="danger"
         onClick={() => {
-          if (window.confirm('Delete all your records and start over?')) onReset()
+          if (window.confirm(m.confirmDelete)) onReset()
         }}
       >
-        Delete records
+        {m.deleteRecords}
       </button>
     </main>
   )
@@ -100,7 +104,7 @@ function TrendChart({ title, sessions, value, format, fixedMax }: ChartProps) {
           <g key={i}>
             <circle className="dot" cx={x(i)} cy={y(v)} r={4} />
             <circle className="hit" cx={x(i)} cy={y(v)} r={12}>
-              <title>{`Session ${i + 1}: ${format(v)}`}</title>
+              <title>{`#${i + 1}: ${format(v)}`}</title>
             </circle>
           </g>
         ))}

@@ -8,6 +8,7 @@ import {
   type SessionResult,
 } from '../practice/practice.ts'
 import type { Question } from '../practice/question.ts'
+import { useMessages } from '../i18n.tsx'
 
 type Props = {
   record: PracticeRecord
@@ -19,6 +20,7 @@ type Props = {
 const CORRECT_PAUSE_MS = 500
 
 export function PracticeScreen({ record, onRecord, onSessionEnd }: Props) {
+  const m = useMessages()
   const [question, setQuestion] = useState<Question>(() => nextQuestion(record, kanjiData, Math.random))
   const [picked, setPicked] = useState<string | null>(null)
   const [pendingResult, setPendingResult] = useState<SessionResult | undefined>()
@@ -79,6 +81,7 @@ export function PracticeScreen({ record, onRecord, onSessionEnd }: Props) {
       <p className="progress">
         {questionNumber} / {QUESTIONS_PER_SESSION}
       </p>
+      <p className="instruction">{m.instruction}</p>
       <div className="target" lang="ja">
         {question.target}
       </div>
@@ -107,17 +110,17 @@ export function PracticeScreen({ record, onRecord, onSessionEnd }: Props) {
               <div className="compare-char is-correct" lang="ja">
                 {question.target}
               </div>
-              <figcaption>Correct</figcaption>
+              <figcaption>{m.correct}</figcaption>
             </figure>
             <figure>
               <div className="compare-char is-wrong" lang="ja">
                 {picked}
               </div>
-              <figcaption>Your choice</figcaption>
+              <figcaption>{m.yourChoice}</figcaption>
             </figure>
           </div>
           <button className="next" onClick={goNext}>
-            Next
+            {m.next}
           </button>
         </div>
       )}
