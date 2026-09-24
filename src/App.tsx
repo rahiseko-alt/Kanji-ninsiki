@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { loadRecord, saveRecord } from './storage.ts'
 import { loadSettings, saveSettings, type Settings } from './settings.ts'
 import { messages, MessagesContext } from './i18n.tsx'
@@ -13,7 +13,9 @@ type Screen = 'practice' | 'records' | 'credits'
 export function App() {
   const [record, setRecord] = useState<PracticeRecord>(loadRecord)
   const [settings, setSettings] = useState<Settings>(loadSettings)
+  // 練習回の結果。10問目に答えた時点で受け取り、結果画面を閉じるまで持つ
   const [result, setResult] = useState<SessionResult | null>(null)
+  const [showResult, setShowResult] = useState(false)
   const [screen, setScreen] = useState<Screen>('practice')
   const m = messages[settings.language]
 
@@ -24,6 +26,17 @@ export function App() {
   const updateSettings = (next: Settings) => {
     saveSettings(next)
     setSettings(next)
+  }
+
+  const openResult = useCallback(() => setShowResult(true), [])
+  const clearResult = () => {
+    setResult(null)
+    setShowResult(false)
+  }
+  // 10問目のあとで別の画面へ移っても、戻ってきたときに結果画面を出す
+  const goTo = (next: Screen) => {
+    if (next !== screen && result) setShowResult(true)
+    setScreen(next)
   }
 
   const tabs: [Screen, string][] = [
@@ -37,7 +50,7 @@ export function App() {
       <div lang={settings.language}>
         <nav className="nav">
           {tabs.map(([id, label]) => (
-            <button key={id} aria-current={screen === id ? 'page' : undefined} onClick={() => setScreen(id)}>
+            <button key={id} aria-current={screen === id ? 'page' : undefined} onClick={() => goTo(id)}>
               {label}
             </button>
           ))}
@@ -48,7 +61,17 @@ export function App() {
             {m.switchLanguage}
           </button>
         </nav>
-        {!settings.seenIntro ? (
+        {screen === 'records' ? (
+          <RecordsScreen
+            record={record}
+            onReset={() => {
+              updateRecord(initialRecord())
+              clearResult()
+            }}
+          />
+        ) : screen === 'credits' ? (
+          <CreditsScreen />
+        ) : !settings.seenIntro ? (
           <main className="page intro">
             <h1>{m.introTitle}</h1>
             <p>{m.introBody}</p>
@@ -56,20 +79,15 @@ export function App() {
               {m.introOk}
             </button>
           </main>
-        ) : screen === 'records' ? (
-          <RecordsScreen
-            record={record}
-            onReset={() => {
-              updateRecord(initialRecord())
-              setResult(null)
-            }}
-          />
-        ) : screen === 'credits' ? (
-          <CreditsScreen />
-        ) : result ? (
-          <ResultScreen result={result} onContinue={() => setResult(null)} />
+        ) : result && showResult ? (
+          <ResultScreen result={result} onContinue={clearResult} />
         ) : (
-          <PracticeScreen record={record} onRecord={updateRecord} onSessionEnd={setResult} />
+          <PracticeScreen
+            record={record}
+            onRecord={updateRecord}
+            onSessionResult={setResult}
+            onShowResult={openResult}
+          />
         )}
       </div>
     </MessagesContext.Provider>

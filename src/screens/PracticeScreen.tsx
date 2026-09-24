@@ -13,13 +13,16 @@ import { useMessages } from '../i18n.tsx'
 type Props = {
   record: PracticeRecord
   onRecord: (record: PracticeRecord) => void
-  onSessionEnd: (result: SessionResult) => void
+  /** 練習回の10問目に答えた時点で呼ばれる（結果画面はまだ出さない） */
+  onSessionResult: (result: SessionResult) => void
+  /** 10問目のあとで「つぎへ」が押されたとき、結果画面へ進む */
+  onShowResult: () => void
 }
 
 /** 正解のときに次の問題へ移るまでの間 */
 const CORRECT_PAUSE_MS = 500
 
-export function PracticeScreen({ record, onRecord, onSessionEnd }: Props) {
+export function PracticeScreen({ record, onRecord, onSessionResult, onShowResult }: Props) {
   const m = useMessages()
   const [question, setQuestion] = useState<Question>(() => nextQuestion(record, kanjiData, Math.random))
   const [picked, setPicked] = useState<string | null>(null)
@@ -27,20 +30,20 @@ export function PracticeScreen({ record, onRecord, onSessionEnd }: Props) {
   const [latest, setLatest] = useState(record)
   const shownAt = useRef(performance.now())
 
-    const answered = picked !== null
+  const answered = picked !== null
   const correct = picked === question.target
   const questionNumber =
     picked === null ? record.currentSession.length + 1 : pendingResult ? QUESTIONS_PER_SESSION : record.currentSession.length
 
   const goNext = useCallback(() => {
     if (pendingResult) {
-      onSessionEnd(pendingResult)
+      onShowResult()
       return
     }
     setQuestion(nextQuestion(latest, kanjiData, Math.random))
     setPicked(null)
     shownAt.current = performance.now()
-  }, [latest, pendingResult, onSessionEnd])
+  }, [latest, pendingResult, onShowResult])
 
   const choose = useCallback(
     (c: string) => {
@@ -50,8 +53,9 @@ export function PracticeScreen({ record, onRecord, onSessionEnd }: Props) {
       setLatest(outcome.record)
       setPendingResult(outcome.sessionResult)
       onRecord(outcome.record)
+      if (outcome.sessionResult) onSessionResult(outcome.sessionResult)
     },
-    [picked, record, question, onRecord],
+    [picked, record, question, onRecord, onSessionResult],
   )
 
   // 正解ならすぐ次へ
@@ -110,7 +114,7 @@ export function PracticeScreen({ record, onRecord, onSessionEnd }: Props) {
               <div className="compare-char is-correct" lang="ja">
                 {question.target}
               </div>
-              <figcaption>{m.correct}</figcaption>
+              <figcaption>{m.sampleCorrect}</figcaption>
             </figure>
             <figure>
               <div className="compare-char is-wrong" lang="ja">

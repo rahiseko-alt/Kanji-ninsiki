@@ -1,5 +1,7 @@
 import type { PracticeRecord, SessionResult } from '../practice/practice.ts'
 import { useMessages } from '../i18n.tsx'
+import { kanjiData } from '../kanjiData.ts'
+import { formatSeconds } from '../format.ts'
 
 type Props = { record: PracticeRecord; onReset: () => void }
 
@@ -10,7 +12,7 @@ export function RecordsScreen({ record, onReset }: Props) {
     <main className="records">
       <h1>{m.recordsTitle}</h1>
       <p>
-        {m.learningCount}: <strong>{record.learningCount}</strong>
+        {m.learningCount}: <strong>{Math.min(record.learningCount, kanjiData.order.length)}</strong>
       </p>
       {sessions.length === 0 ? (
         <p className="empty">{m.noSessions}</p>
@@ -48,7 +50,7 @@ export function RecordsScreen({ record, onReset }: Props) {
                       {s.correct} / {s.total}
                     </td>
                     <td>
-                      {(s.averageMs / 1000).toFixed(1)} {m.seconds}
+                      {formatSeconds(s.averageMs)} {m.seconds}
                     </td>
                   </tr>
                 ))}
