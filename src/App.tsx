@@ -1,53 +1,21 @@
 import { useState } from 'react'
-import { kanjiData } from './kanjiData.ts'
-import { createQuestion, type Question } from './practice/question.ts'
-
-const FIRST_LEARNING = 8
-
-function newQuestion(): Question {
-  const pool = kanjiData.order.slice(0, FIRST_LEARNING)
-  const target = pool[Math.floor(Math.random() * pool.length)]
-  return createQuestion(kanjiData, target, 4, Math.random)
-}
+import { loadRecord, saveRecord } from './storage.ts'
+import { PracticeScreen } from './screens/PracticeScreen.tsx'
+import { ResultScreen } from './screens/ResultScreen.tsx'
+import type { PracticeRecord, SessionResult } from './practice/practice.ts'
 
 export function App() {
-  const [question, setQuestion] = useState(newQuestion)
-  const [picked, setPicked] = useState<string | null>(null)
-  const answered = picked !== null
-  const correct = picked === question.target
+  const [record, setRecord] = useState<PracticeRecord>(loadRecord)
+  const [result, setResult] = useState<SessionResult | null>(null)
 
-  return (
-    <main className="practice">
-      <div className="target" lang="ja">{question.target}</div>
-      <div className="choices">
-        {question.choices.map((c) => (
-          <button
-            key={c}
-            lang="ja"
-            className={
-              'choice' + (answered && c === question.target ? ' is-correct' : '') + (c === picked && !correct ? ' is-wrong' : '')
-            }
-            disabled={answered}
-            onClick={() => setPicked(c)}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-      {answered && (
-        <div className="feedback">
-          <p>{correct ? 'Correct!' : 'Not quite.'}</p>
-          <button
-            className="next"
-            onClick={() => {
-              setQuestion(newQuestion())
-              setPicked(null)
-            }}
-          >
-            Next
-          </button>
-        </div>
-      )}
-    </main>
+  const updateRecord = (next: PracticeRecord) => {
+    saveRecord(next)
+    setRecord(next)
+  }
+
+  return result ? (
+    <ResultScreen result={result} onContinue={() => setResult(null)} />
+  ) : (
+    <PracticeScreen record={record} onRecord={updateRecord} onSessionEnd={setResult} />
   )
 }
