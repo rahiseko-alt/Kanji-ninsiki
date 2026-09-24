@@ -114,3 +114,48 @@ describe('取り違え', () => {
     expect(again.target).not.toBe(q.target) // 直前の見本は続けて出さない
   })
 })
+
+describe('選択肢数', () => {
+  it('5問続けて正解すると 4→6→8 と上がり、8より上がらない', () => {
+    const counts = [0, 4, 5, 9, 10, 14, 15, 30].map((n) => play(initialRecord(), n, () => true).record.choiceCount)
+    expect(counts).toEqual([4, 4, 6, 6, 8, 8, 8, 8])
+  })
+
+  it('取り違えると1段下がり、4より下がらない', () => {
+    const at8 = play(initialRecord(), 10, () => true).record
+    expect(play(at8, 1, () => false).record.choiceCount).toBe(6)
+    expect(play(at8, 2, () => false).record.choiceCount).toBe(4)
+    expect(play(at8, 3, () => false).record.choiceCount).toBe(4)
+  })
+
+  it('取り違えると連続正解数は数え直しになる', () => {
+    // 4問正解 → 取り違え → 4問正解 では上がらない
+    expect(play(initialRecord(), 9, (i) => i !== 4).record.choiceCount).toBe(4)
+  })
+
+  it('選んだ選択肢数どおりの字が並ぶ', () => {
+    const at6 = play(initialRecord(), 5, () => true).record
+    expect(nextQuestion(at6, testData, seededRng(1)).choices).toHaveLength(6)
+  })
+})
+
+describe('学習中の字', () => {
+  it('練習回で9問以上正解すると出題順の次の2字が加わる', () => {
+    expect(play(initialRecord(), 10, (i) => i !== 0).record.learningCount).toBe(10)
+    expect(play(initialRecord(), 10, () => true).record.learningCount).toBe(10)
+  })
+
+  it('8問以下の正解では加わらない', () => {
+    expect(play(initialRecord(), 10, (i) => i > 1).record.learningCount).toBe(8)
+  })
+
+  it('練習回の途中では加わらない', () => {
+    expect(play(initialRecord(), 9, () => true).record.learningCount).toBe(8)
+  })
+
+  it('出題順の最後に達しても止まらず、それ以上は増えない', () => {
+    const { record } = play(initialRecord(), 100, () => true)
+    expect(record.learningCount).toBe(testData.order.length)
+    expect(record.sessions).toHaveLength(10)
+  })
+})

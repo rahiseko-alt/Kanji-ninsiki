@@ -79,3 +79,6 @@ body { margin: 0; background: var(--bg); color: var(--fg); }
 .compare-char.is-correct { border-color: var(--ok); }
 .compare-char.is-wrong { border-color: var(--ng); }
 .compare figcaption { font-size: 15px; margin-top: 6px; }
+.choices-6 { grid-template-columns: repeat(3, 1fr); }
+.choices-8 { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.choices-6 .choice, .choices-8 .choice { font-size: clamp(34px, 10vw, 56px); min-height: 76px; }
