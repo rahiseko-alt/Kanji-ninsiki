@@ -93,9 +93,9 @@ describe('字ごとの記録', () => {
     let record = initialRecord()
     const q = nextQuestion(record, testData, seededRng(7))
     record = answer(record, testData, q, q.target, 1500).record
-    expect(record.stats[q.target]).toEqual({ seen: 1, correct: 1, lastMs: 1500 })
+    expect(record.stats[q.target]).toEqual({ seen: 1, correct: 1, lastMs: 1500, missed: 0, mixedUp: 0 })
     record = answer(record, testData, q, q.choices.find((c) => c !== q.target)!, 2500).record
-    expect(record.stats[q.target]).toEqual({ seen: 2, correct: 1, lastMs: 2500 })
+    expect(record.stats[q.target]).toEqual({ seen: 2, correct: 1, lastMs: 2500, missed: 0, mixedUp: 1 })
   })
 })
 
