@@ -165,7 +165,7 @@ a { color: var(--accent); }
 .target.is-hidden { color: var(--line); }
 .choices.is-concealed { visibility: hidden; }
 /* 段階が4つになったので、狭い画面では2列×2段にそろえる */
-@media (max-width: 520px) {
+@media (max-width: 640px) {
   .stage-switch { display: grid; grid-template-columns: 1fr 1fr; width: calc(100% - 32px); }
   .stage-switch button { padding: 8px 6px; }
   .records .stage-switch { width: 100%; }
