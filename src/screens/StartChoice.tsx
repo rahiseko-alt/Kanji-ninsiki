@@ -3,7 +3,7 @@ import { START_POSITIONS } from '../practice/practice.ts'
 
 type Props = { startAt: number; onChange: (startAt: number) => void }
 
-/** 始める位置の選択（初めて／少し知っている／よく知っている） */
+/** 始める位置の選択（はじめて／すこし しっている／よく しっている） */
 export function StartChoice({ startAt, onChange }: Props) {
   const m = useMessages()
   const options: [number, string][] = [
