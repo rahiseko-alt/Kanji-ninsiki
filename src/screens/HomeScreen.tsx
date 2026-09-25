@@ -1,7 +1,6 @@
 import { useMessages } from '../i18n.tsx'
 import { START_POSITIONS } from '../practice/practice.ts'
-import logo from '../assets/home/logo.webp'
-import landscape from '../assets/home/landscape.webp'
+import stones from '../assets/cover/stones.webp'
 
 type Props = {
   startAt: number
@@ -20,7 +19,7 @@ export function HomeScreen({ startAt, onPractice, onStart }: Props) {
   return (
     <main className="home">
       <header className="home-hero">
-        <img className="home-logo" src={logo} alt="" width={160} height={150} />
+        <img className="home-stones" src={stones} alt="" width={720} height={422} />
         <h1>{m.appTitle}</h1>
         <p className="home-subtitle">{m.appSubtitle}</p>
       </header>
@@ -57,7 +56,6 @@ export function HomeScreen({ startAt, onPractice, onStart }: Props) {
       </button>
       <p className="home-note">{m.readingNote}</p>
 
-      <img className="home-landscape" src={landscape} alt="" />
     </main>
   )
 }
