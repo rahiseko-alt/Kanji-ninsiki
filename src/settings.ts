@@ -13,7 +13,7 @@ export function loadSettings(): Settings {
     const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? 'null')
     return {
       language: raw?.language === 'ja' ? 'ja' : 'en',
-      stage: raw?.stage === 'lv2' ? 'lv2' : 'lv1',
+      stage: raw?.stage === 'lv2' || raw?.stage === 'lv3' ? raw.stage : 'lv1',
       seenIntro: raw?.seenIntro === true,
     }
   } catch {
