@@ -8,6 +8,7 @@ export function StageSwitch({ stage, onChange }: { stage: Stage; onChange: (stag
     ['lv1', m.stageFindOne],
     ['lv2', m.stageFindAll],
     ['lv3', m.stageQuickLook],
+    ['lv4', m.stageOddOneOut],
   ]
   return (
     <div className="stage-switch" role="group">

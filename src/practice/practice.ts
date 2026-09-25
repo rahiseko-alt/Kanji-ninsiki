@@ -1,6 +1,14 @@
-// 練習の進め方（仕様書 rahiseko-alt/Kanji-ninsiki#2 モジュール2、Lv2 は #11、Lv3 は #15）。画面・保存・時計には触れない
+// 練習の進め方（仕様書 rahiseko-alt/Kanji-ninsiki#2 モジュール2、Lv2 は #11、Lv3 は #15、Lv4 は #19）。画面・保存・時計には触れない
 import type { KanjiData } from '../data/buildKanjiData.ts'
-import { createBoard, createQuestion, type BoardQuestion, type Question, type Rng } from './question.ts'
+import {
+  createBoard,
+  createOddBoard,
+  createQuestion,
+  type BoardQuestion,
+  type OddQuestion,
+  type Question,
+  type Rng,
+} from './question.ts'
 
 export const QUESTIONS_PER_SESSION = 10
 const FIRST_LEARNING_COUNT = 8
@@ -33,7 +41,7 @@ export type SessionResult = { correct: number; total: number; averageMs: number 
 
 /** 段階ごとの進み具合 */
 export type StageProgress = {
-  /** 段の値。Lv1 は選択肢数、Lv2 は盤面の字数、Lv3 は表示時間（ms） */
+  /** 段の値。Lv1 は選択肢数、Lv2・Lv4 は盤面の字数、Lv3 は表示時間（ms） */
   choiceCount: number
   /** 字数を上げるための連続正解数 */
   streak: number
@@ -43,12 +51,13 @@ export type StageProgress = {
   sessions: SessionResult[]
 }
 
-/** Lv1 の進み具合は以前の記録と同じ形で直下に持ち、Lv2・Lv3 は lv2・lv3 に持つ */
+/** Lv1 の進み具合は以前の記録と同じ形で直下に持ち、Lv2〜Lv4 は lv2〜lv4 に持つ */
 export type PracticeRecord = StageProgress & {
   /** 学習中の字は出題順の先頭からこの数（段階で共通） */
   learningCount: number
   lv2: StageProgress
   lv3: StageProgress
+  lv4: StageProgress
   stats: Record<string, KanjiStats>
   /** 直近の見本（新しい順） */
   recentTargets: string[]
@@ -68,6 +77,7 @@ export function initialRecord(): PracticeRecord {
     sessions: [],
     lv2: initialStage(BOARD_SIZES[0]),
     lv3: initialStage(SHOW_TIMES[0]),
+    lv4: initialStage(BOARD_SIZES[0]),
   }
 }
 
@@ -75,12 +85,12 @@ function initialStage(choiceCount: number): StageProgress {
   return { choiceCount, streak: 0, currentSession: [], sessions: [] }
 }
 
-/** 段階。Lv1「1つ さがす」、Lv2「ぜんぶ さがす」、Lv3「いっしゅん みる」 */
-export type Stage = 'lv1' | 'lv2' | 'lv3'
-const COUNTS_OF: Record<Stage, number[]> = { lv1: CHOICE_COUNTS, lv2: BOARD_SIZES, lv3: SHOW_TIMES }
+/** 段階。Lv1「1つ さがす」、Lv2「ぜんぶ さがす」、Lv3「いっしゅん みる」、Lv4「ちがう じを さがす」 */
+export type Stage = 'lv1' | 'lv2' | 'lv3' | 'lv4'
+const COUNTS_OF: Record<Stage, number[]> = { lv1: CHOICE_COUNTS, lv2: BOARD_SIZES, lv3: SHOW_TIMES, lv4: BOARD_SIZES }
 
 export function progressOf(record: PracticeRecord, stage: Stage): StageProgress {
-  if (stage === 'lv2' || stage === 'lv3') return record[stage]
+  if (stage !== 'lv1') return record[stage]
   const { choiceCount, streak, currentSession, sessions } = record
   return { choiceCount, streak, currentSession, sessions }
 }
@@ -108,6 +118,10 @@ export function nextFlashQuestion(record: PracticeRecord, data: KanjiData, rng: 
 /** Lv3 の表示時間（ms）。以前の記録と形をそろえるため、段の値の欄に持っている */
 export function showMsOf(record: PracticeRecord): number {
   return record.lv3.choiceCount
+}
+
+export function nextOddQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): OddQuestion {
+  return createOddBoard(data, pickTarget(record, data, rng), record.lv4.choiceCount, rng)
 }
 
 /** 再出題待ちを優先し、無ければ学習中の字から正答率の低い字ほど選ばれやすく選ぶ */
@@ -165,6 +179,25 @@ export function answerFlash(
 ): AnswerOutcome {
   const correct = picked === question.target
   return applyAnswer(record, data, 'lv3', question.target, { correct, missed: false, picked: correct ? undefined : picked }, ms)
+}
+
+/** Lv4 の答え。仲間はずれの位置を押せば正解。外したら並べた字と仲間はずれの両方を再出題する */
+export function answerOdd(
+  record: PracticeRecord,
+  data: KanjiData,
+  question: OddQuestion,
+  pickedIndex: number,
+  ms: number,
+): AnswerOutcome {
+  const correct = pickedIndex === question.oddIndex
+  return applyAnswer(
+    record,
+    data,
+    'lv4',
+    question.target,
+    { correct, missed: false, picked: correct ? undefined : question.odd },
+    ms,
+  )
 }
 
 export type BoardOutcome = AnswerOutcome & {
@@ -299,6 +332,7 @@ export function restoreRecord(saved: unknown): PracticeRecord {
     lv2: r.lv2 === undefined ? initialStage(BOARD_SIZES[0]) : restoreStage(r.lv2),
     // Lv3 を持たない以前の記録は、Lv3 を初期状態で始める
     lv3: r.lv3 === undefined ? initialStage(SHOW_TIMES[0]) : restoreStage(r.lv3),
+    lv4: r.lv4 === undefined ? initialStage(BOARD_SIZES[0]) : restoreStage(r.lv4),
   }
 }
 
@@ -338,6 +372,7 @@ function isRecord(v: unknown): boolean {
     isStage(v, CHOICE_COUNTS) &&
     (v.lv2 === undefined || isStage(v.lv2, BOARD_SIZES)) &&
     (v.lv3 === undefined || isStage(v.lv3, SHOW_TIMES)) &&
+    (v.lv4 === undefined || isStage(v.lv4, BOARD_SIZES)) &&
     isObject(v.stats) &&
     Object.values(v.stats).every(
       (s) =>

@@ -132,7 +132,7 @@ button { font-family: inherit; }
 .credits .license { font-size: 14px; }
 .credits .note { font-size: 13px; opacity: 0.75; }
 a { color: var(--accent); }
-.stage-switch { display: flex; justify-content: center; gap: 0; margin: 12px auto 0; width: fit-content; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.stage-switch { display: flex; flex-wrap: wrap; justify-content: center; gap: 0; margin: 12px auto 0; width: fit-content; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
 .stage-switch button { background: var(--card); color: var(--fg); border: 0; padding: 8px 16px; font-size: 15px; cursor: pointer; }
 .stage-switch button[aria-pressed='true'] { background: var(--accent); color: #fff; }
 .target-small { font-size: clamp(64px, 20vw, 110px); margin-bottom: 16px; }
@@ -164,3 +164,9 @@ a { color: var(--accent); }
 .show-time { margin: -4px 0 10px; font-size: 14px; opacity: 0.7; }
 .target.is-hidden { color: var(--line); }
 .choices.is-concealed { visibility: hidden; }
+/* 段階が4つになったので、狭い画面では2列×2段にそろえる */
+@media (max-width: 520px) {
+  .stage-switch { display: grid; grid-template-columns: 1fr 1fr; width: calc(100% - 32px); }
+  .stage-switch button { padding: 8px 6px; }
+  .records .stage-switch { width: 100%; }
+}
