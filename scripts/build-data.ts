@@ -10,7 +10,7 @@ writeFileSync(
   new URL('kanji-data.json', out),
   JSON.stringify({
     _credits:
-      'Generated from joyo-json (MIT), topokanji (MIT), kanjidist-visualiser (MIT; dkanjistat derived from KanjiVG; dstrokedit from Lars Yencken, CC BY 3.0) and KanjiVG (c) Ulrich Apel, CC BY-SA 3.0 (stroke counts). See the Credits screen.',
+      'Generated from joyo-json (MIT), topokanji (MIT), kanjidist-visualiser (MIT; dkanjistat derived from KanjiVG; dstrokedit from Lars Yencken, CC BY 3.0) and KanjiVG (c) Ulrich Apel, https://kanjivg.tagaini.net/ (stroke counts and the two-part component structure in the parts field; modified data, distributed under CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/). See the Credits screen.',
     ...data,
   }),
 )
@@ -20,7 +20,10 @@ console.log(`kanji-data.json: ${data.order.length} kanji (${padded} with exactly
 // 出典画面から開く、取り込んだデータの公開条件の全文
 const thirdParty = new URL('../third_party/', import.meta.url)
 const notices: [string, string][] = [
-  ['KanjiVG (https://kanjivg.tagaini.net/) - modified data, CC BY-SA 3.0', 'kanjivg/COPYING'],
+  [
+    'KanjiVG (https://kanjivg.tagaini.net/) (c) Ulrich Apel - modified data (stroke counts and two-part component structure bundled in the kanji data), distributed under CC BY-SA 3.0',
+    'kanjivg/COPYING',
+  ],
   ['kanjidist-visualiser (https://github.com/lennart-finke/kanjidist-visualiser)', 'kanjidist-visualiser/LICENSE'],
   ['topokanji (https://github.com/scriptin/topokanji)', 'topokanji/LICENSE'],
   ['joyo-json (https://github.com/hoffmannjp/joyo-json)', 'joyo-json/LICENSE'],
