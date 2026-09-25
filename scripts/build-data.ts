@@ -27,7 +27,6 @@ const notices: [string, string][] = [
   ['kanjidist-visualiser (https://github.com/lennart-finke/kanjidist-visualiser)', 'kanjidist-visualiser/LICENSE'],
   ['topokanji (https://github.com/scriptin/topokanji)', 'topokanji/LICENSE'],
   ['joyo-json (https://github.com/hoffmannjp/joyo-json)', 'joyo-json/LICENSE'],
-  ['Noto Sans JP (subset) - SIL Open Font License 1.1', 'noto-sans-jp/OFL.txt'],
   ['Noto Serif JP (subset) - SIL Open Font License 1.1', 'noto-serif-jp/OFL.txt'],
 ]
 const publicDir = new URL('../public/', import.meta.url)

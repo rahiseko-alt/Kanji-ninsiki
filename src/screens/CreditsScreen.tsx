@@ -34,16 +34,10 @@ const credits: Credit[] = [
     note: 'List of the 2,136 jōyō kanji.',
   },
   {
-    name: 'Noto Sans JP © Adobe (Reserved Font Name: Source)',
-    url: 'https://github.com/google/fonts/tree/main/ofl/notosansjp',
-    license: 'SIL Open Font License 1.1',
-    note: 'Subset to the characters used in this app (modified version).',
-  },
-  {
     name: 'Noto Serif JP © Google Inc.',
     url: 'https://github.com/google/fonts/tree/main/ofl/notoserifjp',
     license: 'SIL Open Font License 1.1',
-    note: 'Used for screen text. Subset to the characters used in this app (modified version).',
+    note: 'Used for all text and kanji. Subset to the characters used in this app (modified version).',
   },
 ]
 

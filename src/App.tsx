@@ -64,7 +64,7 @@ export function App() {
   }
   const changeLanguage = (language: Language) => updateSettings({ ...settings, language })
 
-  // 下のタブ。「れんしゅう」はホームと練習の画面の両方を受け持つ
+  // 下のタブ。「練習」はホームと練習の画面の両方を受け持つ
   const tabs: [Screen, string][] = [
     ['home', m.navPractice],
     ['records', m.navRecords],

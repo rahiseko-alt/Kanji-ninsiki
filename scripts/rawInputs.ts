@@ -27,6 +27,6 @@ export function readRawInputs(): RawInputs {
     strokeEdit: nearest('dstrokedit'),
     kanjistat: nearest('dkanjistat'),
     components: Object.fromEntries(Object.entries(kanjivg.kanji).map(([c, v]) => [c, v.t.k ?? []])),
-    fontChars: [...readFileSync(new URL('../src/assets/fonts/NotoSansJP-subset.chars.txt', import.meta.url), 'utf8')],
+    fontChars: [...readFileSync(new URL('../src/assets/fonts/NotoSerifJP-subset.chars.txt', import.meta.url), 'utf8')],
   }
 }
