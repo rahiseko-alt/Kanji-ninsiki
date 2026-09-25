@@ -23,7 +23,7 @@ type Props = {
 /** 正解のときに次の問題へ移るまでの間 */
 const CORRECT_PAUSE_MS = 500
 
-/** Lv4「ちがう じを さがす」: 見本なしで、同じ字の並ぶ盤面から仲間はずれを1つ選ぶ */
+/** Lv4「違う字を探す」: 見本なしで、同じ字の並ぶ盤面から仲間はずれを1つ選ぶ */
 export function OddScreen({ record, onRecord, onSessionResult, onShowResult }: Props) {
   const m = useMessages()
   const [question, setQuestion] = useState<OddQuestion>(() => nextOddQuestion(record, kanjiData, Math.random))

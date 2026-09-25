@@ -27,7 +27,7 @@ const CORRECT_TO_GROW = 9
 const GROW_BY = 2
 /** 始める位置（出題順の何字目から学習中の字を始めるか） */
 export const START_POSITIONS = { beginner: 0, some: 200, well: 600 } as const
-/** くみたてる で、学習中の字に出せる字が足りないときに足してよい、学習中の字の先の字数 */
+/** 「組み立てる」で、学習中の字に出せる字が足りないときに足してよい、学習中の字の先の字数 */
 const LOOKAHEAD = 20
 
 export type KanjiStats = {
@@ -94,8 +94,8 @@ function initialStage(choiceCount: number): StageProgress {
 }
 
 /**
- * 段階。Lv1「1つ さがす」、Lv2「ぜんぶ さがす」、Lv3「いっしゅん みる」、
- * Lv4「ちがう じを さがす」、Lv5「くみたてる」
+ * 段階。Lv1「1つ探す」、Lv2「全部探す」、Lv3「一瞬見る」、
+ * Lv4「違う字を探す」、Lv5「組み立てる」
  */
 export type Stage = 'lv1' | 'lv2' | 'lv3' | 'lv4' | 'lv5'
 const COUNTS_OF: Record<Stage, number[]> = {
