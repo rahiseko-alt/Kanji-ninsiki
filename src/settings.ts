@@ -12,7 +12,7 @@ export function loadSettings(): Settings {
   try {
     const raw = JSON.parse(localStorage.getItem(SETTINGS_KEY) ?? 'null')
     return {
-      language: raw?.language === 'ja' ? 'ja' : 'en',
+      language: ['ja', 'vi', 'ne'].includes(raw?.language) ? raw.language : 'en',
       stage: ['lv2', 'lv3', 'lv4', 'lv5'].includes(raw?.stage) ? raw.stage : 'lv1',
       seenIntro: raw?.seenIntro === true,
     }

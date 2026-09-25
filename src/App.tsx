@@ -1,7 +1,9 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { loadRecord, saveRecord } from './storage.ts'
 import { loadSettings, saveSettings, type Settings } from './settings.ts'
 import { messages, MessagesContext } from './i18n.tsx'
+import { HomeScreen } from './screens/HomeScreen.tsx'
+import { LanguageSelect } from './screens/LanguageSelect.tsx'
 import { PracticeScreen } from './screens/PracticeScreen.tsx'
 import { BoardScreen } from './screens/BoardScreen.tsx'
 import { OddScreen } from './screens/OddScreen.tsx'
@@ -13,7 +15,7 @@ import { RecordsScreen } from './screens/RecordsScreen.tsx'
 import { CreditsScreen } from './screens/CreditsScreen.tsx'
 import { initialRecord, withStart, type PracticeRecord, type SessionResult, type Stage } from './practice/practice.ts'
 
-type Screen = 'practice' | 'records' | 'credits'
+type Screen = 'home' | 'practice' | 'records' | 'credits'
 
 export function App() {
   const [record, setRecord] = useState<PracticeRecord>(loadRecord)
@@ -21,8 +23,14 @@ export function App() {
   // 練習回の結果。10問目に答えた時点で受け取り、結果画面を閉じるまで持つ
   const [result, setResult] = useState<SessionResult | null>(null)
   const [showResult, setShowResult] = useState(false)
-  const [screen, setScreen] = useState<Screen>('practice')
+  // 開いたときはホームを出す
+  const [screen, setScreen] = useState<Screen>('home')
   const m = messages[settings.language]
+
+  // 読み上げや字形の選び方がそろうよう、ページ全体の言語も合わせる
+  useEffect(() => {
+    document.documentElement.lang = settings.language
+  }, [settings.language])
 
   const updateRecord = (next: PracticeRecord) => {
     saveRecord(next)
@@ -51,6 +59,7 @@ export function App() {
   }
 
   const tabs: [Screen, string][] = [
+    ['home', m.navHome],
     ['practice', m.navPractice],
     ['records', m.navRecords],
     ['credits', m.navCredits],
@@ -65,14 +74,29 @@ export function App() {
               {label}
             </button>
           ))}
-          <button
+          <LanguageSelect
             className="lang-switch"
-            onClick={() => updateSettings({ ...settings, language: settings.language === 'en' ? 'ja' : 'en' })}
-          >
-            {m.switchLanguage}
-          </button>
+            language={settings.language}
+            onChange={(language) => updateSettings({ ...settings, language })}
+          />
         </nav>
-        {screen === 'records' ? (
+        {screen === 'home' ? (
+          <HomeScreen
+            stage={settings.stage}
+            startAt={record.startAt}
+            language={settings.language}
+            onPractice={(stage) => {
+              chooseStage(stage)
+              goTo('practice')
+            }}
+            onStart={(startAt) => {
+              if (startAt !== record.startAt && window.confirm(m.confirmStart)) {
+                updateRecord(withStart(record, kanjiData, startAt))
+              }
+            }}
+            onLanguage={(language) => updateSettings({ ...settings, language })}
+          />
+        ) : screen === 'records' ? (
           <RecordsScreen
             record={record}
             initialStage={settings.stage}

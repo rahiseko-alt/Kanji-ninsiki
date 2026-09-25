@@ -184,3 +184,31 @@ a { color: var(--accent); }
   .start-options { grid-template-columns: 1fr; }
   .start-options button:last-child:nth-child(odd) { grid-column: auto; }
 }
+/* ホーム */
+.home { text-align: center; }
+.home h2 { font-size: 17px; margin: 24px 0 10px; }
+.home-hero { padding: 16px 0 8px; }
+.home-mark {
+  width: 72px; height: 72px; margin: 0 auto 8px;
+  border-radius: 18px; background: var(--accent); color: #fff;
+  font-size: 48px; line-height: 72px;
+}
+.home-hero h1 { font-size: 24px; margin: 8px 0; }
+.tagline { font-size: 15px; line-height: 1.7; opacity: 0.85; margin: 0 0 16px; }
+.home-start { font-size: 20px; padding: 14px 36px; }
+.stage-cards { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; text-align: left; }
+.stage-card {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  background: var(--card); color: var(--fg);
+  border: 2px solid var(--line); border-radius: 12px; padding: 10px 14px; cursor: pointer; text-align: left;
+}
+.stage-card[aria-current='true'] { border-color: var(--accent); }
+.stage-sample { font-size: 28px; min-width: 64px; text-align: center; }
+.stage-text { display: flex; flex-direction: column; gap: 2px; }
+.stage-name { font-weight: 600; font-size: 16px; }
+.stage-desc { font-size: 14px; opacity: 0.75; }
+.home-language select, select.lang-switch {
+  font: inherit; font-size: 15px; padding: 6px 8px; border-radius: 8px;
+  border: 1px solid var(--line); background: var(--card); color: var(--fg);
+}
+select.lang-switch { margin-left: auto; }
