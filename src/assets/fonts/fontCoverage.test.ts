@@ -31,3 +31,16 @@ describe('同梱フォント NotoSansJP-subset.woff2 の収録文字', () => {
     expect(missing, hint(missing)).toEqual([])
   })
 })
+
+describe('同梱フォント NotoSerifJP（明朝体）の収録文字', () => {
+  const serif = new Set(Array.from(read('src/assets/fonts/NotoSerifJP-subset.chars.txt')))
+
+  it('画面の文言（src/i18n.tsx）の日本語の文字をすべて含む', () => {
+    const japanese = Array.from(read('src/i18n.tsx')).filter((c) => c.codePointAt(0)! >= 0x3000)
+    const missing = [...new Set(japanese)].filter((c) => !serif.has(c)).sort()
+    expect(
+      missing,
+      `明朝体に無い文字: ${missing.join('')}\npython3 third_party/noto-serif-jp/subset.py <NotoSerifJP[wght].ttf> を再実行してください`,
+    ).toEqual([])
+  })
+})
