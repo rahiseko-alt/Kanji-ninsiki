@@ -11,13 +11,13 @@ import {
   type PracticeRecord,
   type SessionResult,
 } from '../practice/practice.ts'
-import type { Question } from '../practice/question.ts'
+import type { Question, Rng } from '../practice/question.ts'
 import type { KanjiData } from '../data/buildKanjiData.ts'
 import { useMessages } from '../i18n.tsx'
 
 type Props = {
   /** Lv3「いっしゅん みる」: 見本を表示時間だけ見せてから選択肢を出す */
-  flash?: boolean
+  quickLook?: boolean
   record: PracticeRecord
   onRecord: (record: PracticeRecord) => void
   /** 練習回の10問目に答えた時点で呼ばれる（結果画面はまだ出さない） */
@@ -29,7 +29,6 @@ type Props = {
 /** 正解のときに次の問題へ移るまでの間 */
 const CORRECT_PAUSE_MS = 500
 
-type Rng = () => number
 type AnyQuestion = Question | FlashQuestion
 
 /** Lv1 と Lv3 で、問題の作り方と答え方だけを切り替える */
@@ -41,17 +40,17 @@ const modes = {
   lv3: {
     next: (r: PracticeRecord, d: KanjiData, rng: Rng): AnyQuestion => nextFlashQuestion(r, d, rng),
     answer: (r: PracticeRecord, d: KanjiData, q: AnyQuestion, c: string, ms: number) =>
-      answerFlash(r, d, q as FlashQuestion, c, ms),
+      answerFlash(r, d, q, c, ms),
   },
 }
 
-export function PracticeScreen({ flash = false, record, onRecord, onSessionResult, onShowResult }: Props) {
+export function PracticeScreen({ quickLook = false, record, onRecord, onSessionResult, onShowResult }: Props) {
   const m = useMessages()
-  const stage = flash ? 'lv3' : 'lv1'
+  const stage = quickLook ? 'lv3' : 'lv1'
   const mode = modes[stage]
   const [question, setQuestion] = useState<AnyQuestion>(() => mode.next(record, kanjiData, Math.random))
   // Lv3 で見本を見せている間は true（選択肢を隠す）
-  const [showing, setShowing] = useState(flash)
+  const [showing, setShowing] = useState(quickLook)
   const [picked, setPicked] = useState<string | null>(null)
   const [pendingResult, setPendingResult] = useState<SessionResult | undefined>()
   const [latest, setLatest] = useState(record)
@@ -62,6 +61,8 @@ export function PracticeScreen({ flash = false, record, onRecord, onSessionResul
   const done = progressOf(record, stage).currentSession.length
   const questionNumber = picked === null ? done + 1 : pendingResult ? QUESTIONS_PER_SESSION : done
   const showMs = 'showMs' in question ? question.showMs : 0
+  // Lv3: 見本を見せ終えたら「？」にする。見本は取り違えたときの見比べでだけ見せる
+  const hidden = quickLook && !showing && !(answered && !correct)
 
   const goNext = useCallback(() => {
     if (pendingResult) {
@@ -70,9 +71,9 @@ export function PracticeScreen({ flash = false, record, onRecord, onSessionResul
     }
     setQuestion(mode.next(latest, kanjiData, Math.random))
     setPicked(null)
-    setShowing(flash)
+    setShowing(quickLook)
     shownAt.current = performance.now()
-  }, [latest, pendingResult, onShowResult, mode, flash])
+  }, [latest, pendingResult, onShowResult, mode, quickLook])
 
   // Lv3: 表示時間が過ぎたら見本を隠して選択肢を出し、そこから答えるまでの時間を測る
   useEffect(() => {
@@ -124,14 +125,14 @@ export function PracticeScreen({ flash = false, record, onRecord, onSessionResul
       <p className="progress">
         {questionNumber} / {QUESTIONS_PER_SESSION}
       </p>
-      <p className="instruction">{flash ? m.instructionFlash : m.instruction}</p>
-      {flash && (
+      <p className="instruction">{quickLook ? m.instructionFlash : m.instruction}</p>
+      {quickLook && (
         <p className="show-time">
           {m.showTime}: {(showMs / 1000).toFixed(1)} {m.seconds}
         </p>
       )}
-      <div className={'target' + (flash && !showing && !answered ? ' is-hidden' : '')} lang="ja">
-        {flash && !showing && !answered ? '？' : question.target}
+      <div className={'target' + (hidden ? ' is-hidden' : '')} lang="ja">
+        {hidden ? '？' : question.target}
       </div>
       <div className={`choices choices-${question.choices.length}` + (showing ? ' is-concealed' : '')} aria-hidden={showing}>
         {question.choices.map((c, i) => (

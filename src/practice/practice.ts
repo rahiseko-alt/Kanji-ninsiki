@@ -102,7 +102,12 @@ export type FlashQuestion = Question & { showMs: number }
 
 export function nextFlashQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): FlashQuestion {
   const question = createQuestion(data, pickTarget(record, data, rng), FLASH_CHOICE_COUNT, rng)
-  return { ...question, showMs: record.lv3.choiceCount }
+  return { ...question, showMs: showMsOf(record) }
+}
+
+/** Lv3 の表示時間（ms）。以前の記録と形をそろえるため、段の値の欄に持っている */
+export function showMsOf(record: PracticeRecord): number {
+  return record.lv3.choiceCount
 }
 
 /** 再出題待ちを優先し、無ければ学習中の字から正答率の低い字ほど選ばれやすく選ぶ */
@@ -154,7 +159,7 @@ export function answer(
 export function answerFlash(
   record: PracticeRecord,
   data: KanjiData,
-  question: FlashQuestion,
+  question: Question,
   picked: string,
   ms: number,
 ): AnswerOutcome {
