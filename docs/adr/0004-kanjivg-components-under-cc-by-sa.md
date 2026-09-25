@@ -1,6 +1,6 @@
 # Lv5 の部品データとして KanjiVG 由来のデータを CC BY-SA 3.0 のまま同梱する
 
-段階 Lv5「組み立てる」で見せる部品（例: 亻＋寺→侍）は、KanjiVG（© Ulrich Apel, CC BY-SA 3.0）から作った部品データ（`third_party/kanjivg/kanjivg-joyo-components.json`）の、字の直下の2つの部品を使い、出題用データに入れてアプリに同梱する。部品の分け方をほかに許諾の軽い形で得られる出典が無く、Lv5 はこのデータなしでは作れないため、継承条件（同じ条件で公開すること）を受け入れた。
+段階 Lv5「くみたてる」で見せる部品（例: 亻＋寺→侍）は、KanjiVG（© Ulrich Apel, CC BY-SA 3.0）から作った部品データ（`third_party/kanjivg/kanjivg-joyo-components.json`）の、字の直下の2つの部品を使い、出題用データに入れてアプリに同梱する。部品の分け方をほかに許諾の軽い形で得られる出典が無く、Lv5 はこのデータなしでは作れないため、継承条件（同じ条件で公開すること）を受け入れた。
 
 ## Consequences
 
