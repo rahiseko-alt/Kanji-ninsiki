@@ -1,69 +1,76 @@
-import { useMessages, type Language } from '../i18n.tsx'
-import type { Stage } from '../practice/practice.ts'
-import { StartChoice } from './StartChoice.tsx'
-import { LanguageSelect } from './LanguageSelect.tsx'
+import { LANGUAGE_NAMES, LANGUAGE_SHORT, useMessages, type Language } from '../i18n.tsx'
+import { START_POSITIONS } from '../practice/practice.ts'
+import logo from '../assets/home/logo.webp'
+import landscape from '../assets/home/landscape.webp'
 
 type Props = {
-  stage: Stage
   startAt: number
   language: Language
-  /** 段階を選んで練習を始める */
-  onPractice: (stage: Stage) => void
+  onPractice: () => void
   onStart: (startAt: number) => void
   onLanguage: (language: Language) => void
 }
 
-/** ホーム: アプリの説明、練習を始めるボタン、段階の一覧、始める位置、表示言語 */
-export function HomeScreen({ stage, startAt, language, onPractice, onStart, onLanguage }: Props) {
+/** ホーム: アプリ名、始める位置、練習を始めるボタン、表示言語（右上） */
+export function HomeScreen({ startAt, language, onPractice, onStart, onLanguage }: Props) {
   const m = useMessages()
-  const stages: { id: Stage; name: string; desc: string; sample: string }[] = [
-    { id: 'lv1', name: m.stageFindOne, desc: m.descLv1, sample: '持' },
-    { id: 'lv2', name: m.stageFindAll, desc: m.descLv2, sample: '持持' },
-    { id: 'lv3', name: m.stageQuickLook, desc: m.descLv3, sample: '？' },
-    { id: 'lv4', name: m.stageOddOneOut, desc: m.descLv4, sample: '持待' },
-    { id: 'lv5', name: m.stageBuild, desc: m.descLv5, sample: '扌寺' },
+  const options: { value: number; name: string; desc: string }[] = [
+    { value: START_POSITIONS.beginner, name: m.startBeginner, desc: m.startDescBeginner },
+    { value: START_POSITIONS.some, name: m.startSome, desc: m.startDescSome },
+    { value: START_POSITIONS.well, name: m.startWell, desc: m.startDescWell },
   ]
   return (
-    <main className="page home">
+    <main className="home">
+      <label className="home-lang">
+        <span aria-hidden="true">{LANGUAGE_SHORT[language]}</span>
+        <select aria-label={m.languageLabel} value={language} onChange={(e) => onLanguage(e.target.value as Language)}>
+          {(Object.keys(LANGUAGE_NAMES) as Language[]).map((l) => (
+            <option key={l} value={l} lang={l}>
+              {LANGUAGE_NAMES[l]}
+            </option>
+          ))}
+        </select>
+      </label>
+
       <header className="home-hero">
-        <div className="home-mark" lang="ja" aria-hidden="true">
-          字
-        </div>
+        <img className="home-logo" src={logo} alt="" width={160} height={150} />
         <h1>{m.appTitle}</h1>
-        <p className="tagline">{m.appTagline}</p>
-        <p className="hint">{m.storageNote}</p>
-        <button className="next home-start" onClick={() => onPractice(stage)}>
-          {m.startPractice}
-        </button>
+        <p className="home-subtitle">{m.appSubtitle}</p>
       </header>
 
-      <section>
-        <h2>{m.stagesTitle}</h2>
-        <ol className="stage-cards">
-          {stages.map((s, i) => (
-            <li key={s.id}>
-              <button className="stage-card" aria-current={s.id === stage ? 'true' : undefined} onClick={() => onPractice(s.id)}>
-                <span className="stage-sample" lang="ja" aria-hidden="true">
-                  {s.sample}
-                </span>
-                <span className="stage-text">
-                  <span className="stage-name">
-                    {i + 1}. {s.name}
-                  </span>
-                  <span className="stage-desc">{s.desc}</span>
-                </span>
-              </button>
-            </li>
+      <section className="home-start">
+        <h2>{m.startTitle}</h2>
+        <div className="brush-line" aria-hidden="true" />
+        <div className="start-cards" role="radiogroup" aria-label={m.startTitle}>
+          {options.map((o) => (
+            <button
+              key={o.value}
+              className="start-card"
+              role="radio"
+              aria-checked={startAt === o.value}
+              onClick={() => onStart(o.value)}
+            >
+              <span className="start-card-text">
+                <span className="start-card-name">{o.name}</span>
+                <span className="start-card-desc">{o.desc}</span>
+              </span>
+              <span className="chevron" aria-hidden="true">
+                ›
+              </span>
+            </button>
           ))}
-        </ol>
+        </div>
       </section>
 
-      <StartChoice startAt={startAt} onChange={onStart} />
+      <button className="ink-button" onClick={onPractice}>
+        <span>{m.startPractice}</span>
+        <span className="chevron" aria-hidden="true">
+          ›
+        </span>
+      </button>
+      <p className="home-note">{m.readingNote}</p>
 
-      <section className="home-language">
-        <h2>{m.languageLabel}</h2>
-        <LanguageSelect language={language} onChange={onLanguage} />
-      </section>
+      <img className="home-landscape" src={landscape} alt="" />
     </main>
   )
 }

@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/apple-touch-icon.png', 'third-party-notices.txt'],
       workbox: {
-        globPatterns: ['**/*.{js,css,html,woff2,png,txt}'],
+        globPatterns: ['**/*.{js,css,html,woff2,png,webp,txt}'],
       },
       manifest: {
         name: 'Kanji Shape Trainer',

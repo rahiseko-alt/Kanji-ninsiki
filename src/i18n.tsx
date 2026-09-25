@@ -4,6 +4,9 @@ import { createContext, useContext } from 'react'
 
 export type Language = 'en' | 'ja' | 'vi' | 'ne'
 
+/** ホーム右上に出す、いまの言語の短い表示 */
+export const LANGUAGE_SHORT: Record<Language, string> = { en: 'EN', ja: 'にほんご', vi: 'VI', ne: 'NE' }
+
 /** 言語の選択肢に出す名前（それぞれの言語で書く） */
 export const LANGUAGE_NAMES: Record<Language, string> = {
   en: 'English',
@@ -13,16 +16,14 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
 }
 
 const en = {
+  appSubtitle: 'Practice telling kanji apart by their shape',
+  startDescBeginner: 'Start with basic kanji',
+  startDescSome: 'Practice kanji you often see',
+  startDescWell: 'Try harder kanji too',
+  readingNote: "You don't need to know how to read them",
   navHome: 'Home',
   appTitle: 'Kanji Shape Trainer',
-  appTagline: 'Learn to see each kanji as one shape. No reading or meaning needed — just look and find.',
   startPractice: 'Start practice',
-  stagesTitle: 'Practice modes',
-  descLv1: 'Find the kanji that matches the sample.',
-  descLv2: 'Find every copy of the sample on the board.',
-  descLv3: 'See the sample for a moment, then choose it.',
-  descLv4: 'Find the one kanji that is different.',
-  descLv5: 'Put two parts together and choose the kanji.',
   languageLabel: 'Language',
   storageNote: 'Your records are saved only on this device. They are not shared with other devices.',
   navPractice: 'Practice',
@@ -75,21 +76,19 @@ const en = {
 export type Messages = typeof en
 
 const ja: Messages = {
+  appSubtitle: '漢字の「形」を見分ける練習',
+  startDescBeginner: '基本的な漢字から練習します',
+  startDescSome: 'よく見る漢字を中心に練習します',
+  startDescWell: '難しめの漢字にも挑戦します',
+  readingNote: '読み方を知らなくても大丈夫',
   navHome: 'ホーム',
-  appTitle: 'かんじの かたち れんしゅう',
-  appTagline: 'かんじを 1つの かたちとして みる れんしゅうです。よみかたや いみは いりません。みて、さがす だけです。',
-  startPractice: 'れんしゅうを はじめる',
-  stagesTitle: 'れんしゅうの しゅるい',
-  descLv1: 'みほんと おなじ かんじを 1つ えらびます。',
-  descLv2: 'みほんと おなじ かんじを ぜんぶ えらびます。',
-  descLv3: 'みほんを すこしだけ みて、おなじ かんじを えらびます。',
-  descLv4: '1つだけ ちがう かんじを さがします。',
-  descLv5: '2つの ぶひんを あわせた かんじを えらびます。',
+  appTitle: '漢字認識トレーナー',
+  startPractice: '練習をはじめる',
   languageLabel: 'ことば',
   storageNote: 'きろくは この きかいの なかにだけ のこります。ほかの きかいには ひきつがれません。',
   navPractice: 'れんしゅう',
   navRecords: 'きろく',
-  navCredits: 'しゅってん',
+  navCredits: 'クレジット',
   instruction: 'おなじ かんじを えらんで ください。',
   stageFindOne: '1つ さがす',
   stageFindAll: 'ぜんぶ さがす',
@@ -135,16 +134,14 @@ const ja: Messages = {
 }
 
 const vi: Messages = {
+  appSubtitle: 'Luyện phân biệt chữ Hán qua hình dạng',
+  startDescBeginner: 'Bắt đầu từ những chữ cơ bản',
+  startDescSome: 'Luyện chủ yếu những chữ thường gặp',
+  startDescWell: 'Thử cả những chữ khó hơn',
+  readingNote: 'Không cần biết cách đọc cũng không sao',
   navHome: 'Trang chủ',
   appTitle: 'Luyện nhận diện chữ Hán',
-  appTagline: 'Luyện nhìn mỗi chữ Hán như một hình khối. Không cần biết cách đọc hay nghĩa — chỉ cần nhìn và tìm.',
   startPractice: 'Bắt đầu luyện tập',
-  stagesTitle: 'Các kiểu luyện tập',
-  descLv1: 'Chọn chữ giống với chữ mẫu.',
-  descLv2: 'Tìm tất cả các chữ giống chữ mẫu trên bảng.',
-  descLv3: 'Nhìn chữ mẫu trong giây lát, rồi chọn chữ đó.',
-  descLv4: 'Tìm một chữ khác với các chữ còn lại.',
-  descLv5: 'Ghép hai bộ phận lại và chọn chữ đúng.',
   languageLabel: 'Ngôn ngữ',
   storageNote: 'Lịch sử luyện tập chỉ được lưu trên thiết bị này, không chuyển sang thiết bị khác.',
   navPractice: 'Luyện tập',
@@ -195,16 +192,14 @@ const vi: Messages = {
 }
 
 const ne: Messages = {
+  appSubtitle: 'कान्जीलाई आकारबाट छुट्याउने अभ्यास',
+  startDescBeginner: 'आधारभूत कान्जीबाट सुरु गर्नुहोस्',
+  startDescSome: 'प्रायः देखिने कान्जीमा अभ्यास गर्नुहोस्',
+  startDescWell: 'अलि कठिन कान्जी पनि प्रयास गर्नुहोस्',
+  readingNote: 'उच्चारण नजाने पनि ठीक छ',
   navHome: 'गृहपृष्ठ',
   appTitle: 'कान्जी आकार अभ्यास',
-  appTagline: 'हरेक कान्जीलाई एउटै आकारको रूपमा हेर्ने अभ्यास। उच्चारण वा अर्थ जान्नु पर्दैन — हेर्नुहोस् र खोज्नुहोस्।',
   startPractice: 'अभ्यास सुरु गर्नुहोस्',
-  stagesTitle: 'अभ्यासका प्रकार',
-  descLv1: 'नमूनासँग मिल्ने कान्जी छान्नुहोस्।',
-  descLv2: 'बोर्डमा नमूनासँग मिल्ने सबै कान्जी खोज्नुहोस्।',
-  descLv3: 'नमूना छिनभर हेर्नुहोस्, अनि त्यही कान्जी छान्नुहोस्।',
-  descLv4: 'अरूभन्दा फरक एउटा कान्जी खोज्नुहोस्।',
-  descLv5: 'दुई भाग जोडेर बन्ने कान्जी छान्नुहोस्।',
   languageLabel: 'भाषा',
   storageNote: 'अभिलेख यही उपकरणमा मात्र राखिन्छ, अरू उपकरणमा सर्दैन।',
   navPractice: 'अभ्यास',
