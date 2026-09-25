@@ -266,21 +266,13 @@ a { color: var(--accent); }
 .start-card[aria-current='true'] { border-color: var(--accent); }
 
 /* アプリ説明: 文章が下から上へ流れる */
-.intro-viewport {
-  position: fixed; inset: 0; overflow: hidden;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 82%, transparent);
-  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 82%, transparent);
-}
-.intro-roll {
-  position: absolute; left: 0; right: 0; top: 100%;
-  max-width: 480px; margin: 0 auto; padding: 0 24px;
-  text-align: center;
-  animation-name: intro-roll; animation-timing-function: linear; animation-fill-mode: forwards;
-}
-@keyframes intro-roll {
-  from { transform: translateY(0); }
-  to { transform: translateY(calc(-100% - 100vh)); }
-}
+/* 文章と挿絵を1枚のページにまとめ、ページごと下から上へ送る。上下の端は背景色でぼかす */
+.intro-viewport { position: fixed; inset: 0; overflow-y: auto; scrollbar-width: none; }
+.intro-viewport::-webkit-scrollbar { display: none; }
+.intro-roll { max-width: 480px; margin: 0 auto; padding: 100vh 24px 45vh; text-align: center; }
+.intro::before, .intro::after { content: ''; position: fixed; left: 0; right: 0; z-index: 2; pointer-events: none; }
+.intro::before { top: 0; height: 12vh; background: linear-gradient(var(--bg), transparent); }
+.intro::after { bottom: 0; height: 16vh; background: linear-gradient(transparent, var(--bg)); }
 .intro-block { margin: 0 0 56px; }
 .intro-block p { margin: 0; font-size: clamp(18px, 5vw, 22px); line-height: 1.9; letter-spacing: 0.04em; word-break: keep-all; overflow-wrap: anywhere; }
 .intro-block img { display: block; width: min(46vw, 180px); height: auto; margin: 0 auto 10px; }
@@ -295,9 +287,8 @@ a { color: var(--accent); }
   padding: 8px 18px; font-size: 15px; cursor: pointer; opacity: 0.85;
 }
 .intro-next { position: fixed; left: 16px; right: 16px; width: auto; max-width: 420px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 5; margin: 0 auto; }
-/* 流し終えた後と、動きを減らす設定の端末では、全文を普通に読めるようにする */
-.intro.is-static .intro-viewport { position: static; overflow: visible; -webkit-mask-image: none; mask-image: none; }
-.intro.is-static .intro-roll { position: static; animation: none; padding: 64px 24px 120px; }
+/* 動きを減らす設定の端末では流さず、最初から全文を読めるようにする */
+.intro.is-static .intro-roll { padding: 64px 24px 140px; }
 @media (prefers-color-scheme: dark) {
   .intro-block img { filter: invert(0.9); }
 }

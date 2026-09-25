@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useMessages } from '../i18n.tsx'
 import world from '../assets/intro/world.webp'
 import compare from '../assets/intro/compare.webp'
@@ -10,7 +10,7 @@ import parts from '../assets/intro/parts.webp'
 import goal from '../assets/intro/goal.webp'
 
 /** 文章が下から上へ流れる速さ（1秒あたりの px） */
-const ROLL_SPEED = 44
+const ROLL_SPEED = 50
 
 /** 慣れない文字の例（デーヴァナーガリー）と、よく似た漢字の組。どの言語でも同じものを見せる */
 const DEVANAGARI = ['क ख ग घ च छ']
@@ -25,10 +25,10 @@ type Props = {
 /** アプリ説明: 文章が下から上へ流れ、段落ごとに挿絵を添える */
 export function IntroScreen({ canSkip, onDone }: Props) {
   const m = useMessages()
-  const rollRef = useRef<HTMLDivElement>(null)
-  const [duration, setDuration] = useState<number | null>(null)
+  const viewRef = useRef<HTMLDivElement>(null)
   // 動きを減らす設定の端末では流さず、最初から全文を見せる
-  const [ended, setEnded] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
+  const [reduced] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
+  const [ended, setEnded] = useState(reduced)
 
   const blocks: { text: string; img?: string; glyphs?: string[]; bullet?: boolean }[] = [
     { text: m.introLead },
@@ -47,28 +47,40 @@ export function IntroScreen({ canSkip, onDone }: Props) {
     { text: m.introGoal, img: goal },
   ]
 
-  // 文章の長さは言語で変わるので、高さから流す時間を決める（言語を変えたら最初から流し直す）
-  useLayoutEffect(() => {
-    const roll = rollRef.current
-    if (!roll) return
-    setDuration((roll.offsetHeight + window.innerHeight) / ROLL_SPEED)
-  }, [m])
+  // 文章と挿絵を1枚のページとしてまとめ、そのページを下から上へ送る（画面の送りなので、途中で消えない）。
+  // 利用者が指で動かしたら、その位置から続ける。言語を変えたら最初から流し直す
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view || reduced) return
+    view.scrollTop = 0
+    setEnded(false)
+    let pos = 0
+    let last = performance.now()
+    let raf = 0
+    const tick = (now: number) => {
+      if (Math.abs(view.scrollTop - pos) > 4) pos = view.scrollTop
+      pos += ((now - last) / 1000) * ROLL_SPEED
+      last = now
+      if (pos >= view.scrollHeight - view.clientHeight) {
+        setEnded(true)
+        return
+      }
+      view.scrollTop = pos
+      raf = requestAnimationFrame(tick)
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [m, reduced])
 
   return (
-    <main className={`intro ${ended ? 'is-static' : ''}`}>
-      <div className="intro-viewport">
-        <div
-          key={m.introLead}
-          ref={rollRef}
-          className="intro-roll"
-          style={duration ? { animationDuration: `${duration}s` } : { visibility: 'hidden' }}
-          onAnimationEnd={() => setEnded(true)}
-        >
+    <main className={`intro ${reduced ? 'is-static' : ''}`}>
+      <div className="intro-viewport" ref={viewRef}>
+        <div className="intro-roll">
           {blocks
             .filter((b) => b.text)
             .map((b) => (
               <section key={b.text} className={`intro-block ${b.bullet ? 'is-bullet' : ''}`}>
-                {b.img && <img src={b.img} alt="" loading="lazy" />}
+                {b.img && <img src={b.img} alt="" />}
                 <p>{b.text}</p>
                 {b.glyphs && (
                   <div className="intro-glyphs" aria-hidden="true">
