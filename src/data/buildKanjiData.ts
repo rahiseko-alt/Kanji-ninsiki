@@ -14,12 +14,24 @@ export type RawInputs = {
   strokeEdit: Distances
   /** kanjistat 距離 */
   kanjistat: Distances
+  /** 字 → 直下の部品（KanjiVG の部品データ。CC BY-SA 3.0、ADR-0004） */
+  components: Record<string, ComponentNode[]>
+  /** 同梱フォントが持つ文字 */
+  fontChars: string[]
 }
+
+/** KanjiVG の部品の節。e は部品の字、p は位置（left/right/top/bottom など）、pt は分割された部品の番号 */
+export type ComponentNode = { e?: string; p?: string; pt?: string }
+
+/** Lv5 で見せる部品。row は左右（「亻 ＋ 寺」）、column は上下に並べる */
+export type Parts = { parts: [string, string]; layout: 'row' | 'column' }
 
 export type KanjiEntry = {
   strokes: number
   /** 紛らわし字候補。似ている順 */
   distractors: string[]
+  /** 2つの部品に分かれ、どちらも同梱フォントで表示できる字だけが持つ */
+  parts?: Parts
 }
 
 export type KanjiData = {
@@ -37,10 +49,27 @@ export function buildKanjiData(raw: RawInputs): KanjiData {
   const order = buildOrder(raw, joyo)
   const rank = new Map(order.map((c, i) => [c, i]))
   const kanji: Record<string, KanjiEntry> = {}
+  const fontChars = new Set(raw.fontChars)
   for (const c of order) {
-    kanji[c] = { strokes: raw.strokes[c], distractors: distractorsFor(c, raw, joyo, order, rank) }
+    const entry: KanjiEntry = { strokes: raw.strokes[c], distractors: distractorsFor(c, raw, joyo, order, rank) }
+    const parts = partsOf(c, raw.components[c] ?? [], fontChars)
+    if (parts) entry.parts = parts
+    kanji[c] = entry
   }
   return { order, kanji }
+}
+
+function partsOf(c: string, children: ComponentNode[], fontChars: Set<string>): Parts | undefined {
+  if (children.length !== 2 || children.some((k) => k.pt !== undefined)) return undefined
+  const [a, b] = children.map((k) => k.e)
+  const usable = (e: string | undefined): e is string =>
+    e !== undefined && [...e].length === 1 && e !== c && fontChars.has(e)
+  if (!usable(a) || !usable(b)) return undefined
+  // 左右か上下にきれいに分かれる字だけを出す（かまえ・たれ・にょう等は、並べ方で形を表せないため外す）
+  const [p, q] = children.map((k) => k.p)
+  if (p === 'left' && q === 'right') return { parts: [a, b], layout: 'row' }
+  if (p === 'top' && q === 'bottom') return { parts: [a, b], layout: 'column' }
+  return undefined
 }
 
 function buildOrder(raw: RawInputs, joyo: Set<string>): string[] {

@@ -7,7 +7,7 @@ const credits: Credit[] = [
     name: 'KanjiVG © Ulrich Apel',
     url: 'https://kanjivg.tagaini.net/',
     license: 'CC BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/)',
-    note: 'Stroke counts are taken from data derived from KanjiVG. The original data has been modified (stroke paths removed, component structure re-encoded as JSON); the modified data is distributed under the same license.',
+    note: 'Stroke counts and the two-part component structure used in Build it are taken from data derived from KanjiVG. The original data has been modified (stroke paths removed, component structure re-encoded as JSON); the modified data is distributed under the same license.',
   },
   {
     name: 'kanjidist-visualiser © 2024 Lennart Finke & Dominic Schuhmacher',
