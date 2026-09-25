@@ -4,6 +4,9 @@ import { createContext, useContext } from 'react'
 
 export type Language = 'en' | 'ja' | 'vi' | 'ne'
 
+/** アプリ名。どの言語でも同じ（利用者の指定） */
+export const APP_NAME = '認字'
+
 /** ホーム右上に出す、いまの言語の短い表示 */
 export const LANGUAGE_SHORT: Record<Language, string> = { en: 'EN', ja: 'にほんご', vi: 'VI', ne: 'NE' }
 
@@ -22,7 +25,6 @@ const en = {
   startDescWell: 'Try harder kanji too',
   readingNote: "You don't need to know how to read them",
   navHome: 'Home',
-  appTitle: 'Kanji Shape Trainer',
   startPractice: 'Start practice',
   languageLabel: 'Language',
   storageNote: 'Your records are saved only on this device. They are not shared with other devices.',
@@ -108,7 +110,6 @@ const ja: Messages = {
   startDescWell: 'むずかしい かんじも',
   readingNote: 'よめなくて だいじょうぶ',
   navHome: 'ホーム',
-  appTitle: 'かんじ トレーナー',
   startPractice: 'はじめる',
   languageLabel: 'ことば',
   storageNote: 'きろくは この きかいだけに のこります。',
@@ -192,7 +193,6 @@ const vi: Messages = {
   startDescWell: 'Thử cả những chữ khó hơn',
   readingNote: 'Không cần biết cách đọc cũng không sao',
   navHome: 'Trang chủ',
-  appTitle: 'Luyện nhận diện chữ Hán',
   startPractice: 'Bắt đầu luyện tập',
   languageLabel: 'Ngôn ngữ',
   storageNote: 'Lịch sử luyện tập chỉ được lưu trên thiết bị này, không chuyển sang thiết bị khác.',
@@ -276,7 +276,6 @@ const ne: Messages = {
   startDescWell: 'अलि कठिन कान्जी पनि प्रयास गर्नुहोस्',
   readingNote: 'उच्चारण नजाने पनि ठीक छ',
   navHome: 'गृहपृष्ठ',
-  appTitle: 'कान्जी आकार अभ्यास',
   startPractice: 'अभ्यास सुरु गर्नुहोस्',
   languageLabel: 'भाषा',
   storageNote: 'अभिलेख यही उपकरणमा मात्र राखिन्छ, अरू उपकरणमा सर्दैन।',

@@ -1,4 +1,4 @@
-import { useMessages } from '../i18n.tsx'
+import { APP_NAME, useMessages } from '../i18n.tsx'
 import { START_POSITIONS } from '../practice/practice.ts'
 import stones from '../assets/cover/stones.webp'
 
@@ -20,7 +20,7 @@ export function HomeScreen({ startAt, onPractice, onStart }: Props) {
     <main className="home">
       <header className="home-hero">
         <img className="home-stones" src={stones} alt="" width={720} height={422} />
-        <h1>{m.appTitle}</h1>
+        <h1 lang="ja">{APP_NAME}</h1>
         <p className="home-subtitle">{m.appSubtitle}</p>
       </header>
 
