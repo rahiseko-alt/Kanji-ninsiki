@@ -277,12 +277,7 @@ a { color: var(--accent); }
 }
 .intro-block { margin: 0 0 56px; }
 .intro-block p { margin: 0; font-size: clamp(18px, 5vw, 22px); line-height: 1.9; letter-spacing: 0.04em; word-break: keep-all; overflow-wrap: anywhere; }
-.intro-block img {
-  display: block; width: min(46vw, 180px); height: auto; margin: 0 auto 8px; mix-blend-mode: multiply;
-  /* 挿絵の紙の縁を消して、背景になじませる */
-  -webkit-mask-image: radial-gradient(ellipse closest-side, #000 70%, transparent);
-  mask-image: radial-gradient(ellipse closest-side, #000 70%, transparent);
-}
+.intro-block img { display: block; width: min(46vw, 180px); height: auto; margin: 0 auto 10px; }
 .intro-block.is-bullet { margin-bottom: 36px; }
 .intro-block.is-bullet p { font-weight: 700; }
 .intro-block.is-bullet img { width: min(36vw, 140px); }
@@ -296,5 +291,5 @@ a { color: var(--accent); }
 .intro.is-static .intro-viewport { position: static; overflow: visible; -webkit-mask-image: none; mask-image: none; }
 .intro.is-static .intro-roll { position: static; animation: none; padding: 64px 24px 120px; }
 @media (prefers-color-scheme: dark) {
-  .intro-block img { mix-blend-mode: normal; filter: invert(0.9) hue-rotate(180deg); opacity: 0.85; }
+  .intro-block img { filter: invert(0.9); }
 }
