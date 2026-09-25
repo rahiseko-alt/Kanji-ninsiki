@@ -23,7 +23,7 @@ type Props = {
 /** 正解のときに次の問題へ移るまでの間 */
 const CORRECT_PAUSE_MS = 700
 
-/** Lv2「ぜんぶ さがす」: 盤面から見本と同じ字を全部選ぶ */
+/** Lv2「全部探す」: 盤面から見本と同じ字を全部選ぶ */
 export function BoardScreen({ record, onRecord, onSessionResult, onShowResult }: Props) {
   const m = useMessages()
   const [question, setQuestion] = useState<BoardQuestion>(() => nextBoardQuestion(record, kanjiData, Math.random))

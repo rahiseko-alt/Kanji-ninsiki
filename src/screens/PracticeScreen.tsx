@@ -20,8 +20,8 @@ import { useMessages } from '../i18n.tsx'
 
 type Props = {
   /**
-   * lv1「1つ さがす」、lv3「いっしゅん みる」（見本を表示時間だけ見せてから選択肢を出す）、
-   * lv5「くみたてる」（見本のかわりに部品2つを見せる）
+   * lv1「1つ探す」、lv3「一瞬見る」（見本を表示時間だけ見せてから選択肢を出す）、
+   * lv5「組み立てる」（見本のかわりに部品2つを見せる）
    */
   stage: 'lv1' | 'lv3' | 'lv5'
   record: PracticeRecord
@@ -57,7 +57,7 @@ const modes = {
 
 export function PracticeScreen(props: Props) {
   const m = useMessages()
-  // くみたてる では、学習中の字の近くに組み立てられる字が無いと問題を出せない
+  // 「組み立てる」では、学習中の字の近くに組み立てられる字が無いと問題を出せない
   const [first] = useState(() => modes[props.stage].next(props.record, kanjiData, Math.random))
   if (first === null) {
     return (
