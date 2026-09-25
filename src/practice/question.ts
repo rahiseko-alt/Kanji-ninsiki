@@ -39,3 +39,22 @@ export function createBoard(data: KanjiData, target: string, size: number, rng: 
   const fillers = Array.from({ length: size - copies }, () => pool[Math.floor(rng() * pool.length)])
   return { target, board: shuffle([...Array<string>(copies).fill(target), ...fillers], rng) }
 }
+
+/** Lv4 の問題。盤面は target で埋まり、oddIndex の位置だけ仲間はずれ odd がある */
+export type OddQuestion = {
+  target: string
+  odd: string
+  oddIndex: number
+  board: string[]
+}
+
+/** 仲間はずれは、紛らわし字候補のうち最も似たこの数の中から選ぶ */
+const ODD_POOL = 3
+
+export function createOddBoard(data: KanjiData, target: string, size: number, rng: Rng): OddQuestion {
+  const pool = data.kanji[target].distractors.slice(0, ODD_POOL)
+  const odd = pool[Math.floor(rng() * pool.length)]
+  const oddIndex = Math.floor(rng() * size)
+  const board = Array.from({ length: size }, (_, i) => (i === oddIndex ? odd : target))
+  return { target, odd, oddIndex, board }
+}

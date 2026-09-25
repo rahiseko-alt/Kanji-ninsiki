@@ -4,6 +4,7 @@ import { loadSettings, saveSettings, type Settings } from './settings.ts'
 import { messages, MessagesContext } from './i18n.tsx'
 import { PracticeScreen } from './screens/PracticeScreen.tsx'
 import { BoardScreen } from './screens/BoardScreen.tsx'
+import { OddScreen } from './screens/OddScreen.tsx'
 import { StageSwitch } from './screens/StageSwitch.tsx'
 import { ResultScreen } from './screens/ResultScreen.tsx'
 import { RecordsScreen } from './screens/RecordsScreen.tsx'
@@ -94,7 +95,15 @@ export function App() {
             {result && showResult ? (
               <ResultScreen result={result} onContinue={clearResult} />
             ) : (
-              settings.stage === 'lv2' ? (
+              settings.stage === 'lv4' ? (
+                <OddScreen
+                  key={settings.stage}
+                  record={record}
+                  onRecord={updateRecord}
+                  onSessionResult={setResult}
+                  onShowResult={openResult}
+                />
+              ) : settings.stage === 'lv2' ? (
                 <BoardScreen
                   key={settings.stage}
                   record={record}
