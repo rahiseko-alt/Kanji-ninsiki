@@ -46,7 +46,6 @@ export function App() {
     if (result) setShowResult(true)
     updateSettings({ ...settings, stage })
   }
-  const Practice = settings.stage === 'lv2' ? BoardScreen : PracticeScreen
 
   const tabs: [Screen, string][] = [
     ['practice', m.navPractice],
@@ -95,13 +94,24 @@ export function App() {
             {result && showResult ? (
               <ResultScreen result={result} onContinue={clearResult} />
             ) : (
-              <Practice
-                key={settings.stage}
-                record={record}
-                onRecord={updateRecord}
-                onSessionResult={setResult}
-                onShowResult={openResult}
-              />
+              settings.stage === 'lv2' ? (
+                <BoardScreen
+                  key={settings.stage}
+                  record={record}
+                  onRecord={updateRecord}
+                  onSessionResult={setResult}
+                  onShowResult={openResult}
+                />
+              ) : (
+                <PracticeScreen
+                  key={settings.stage}
+                  quickLook={settings.stage === 'lv3'}
+                  record={record}
+                  onRecord={updateRecord}
+                  onSessionResult={setResult}
+                  onShowResult={openResult}
+                />
+              )
             )}
           </>
         )}

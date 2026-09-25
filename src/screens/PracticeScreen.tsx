@@ -2,15 +2,22 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { kanjiData } from '../kanjiData.ts'
 import {
   answer,
+  answerFlash,
+  nextFlashQuestion,
   nextQuestion,
+  progressOf,
   QUESTIONS_PER_SESSION,
+  type FlashQuestion,
   type PracticeRecord,
   type SessionResult,
 } from '../practice/practice.ts'
-import type { Question } from '../practice/question.ts'
+import type { Question, Rng } from '../practice/question.ts'
+import type { KanjiData } from '../data/buildKanjiData.ts'
 import { useMessages } from '../i18n.tsx'
 
 type Props = {
+  /** Lv3「いっしゅん みる」: 見本を表示時間だけ見せてから選択肢を出す */
+  quickLook?: boolean
   record: PracticeRecord
   onRecord: (record: PracticeRecord) => void
   /** 練習回の10問目に答えた時点で呼ばれる（結果画面はまだ出さない） */
@@ -22,9 +29,28 @@ type Props = {
 /** 正解のときに次の問題へ移るまでの間 */
 const CORRECT_PAUSE_MS = 500
 
-export function PracticeScreen({ record, onRecord, onSessionResult, onShowResult }: Props) {
+type AnyQuestion = Question | FlashQuestion
+
+/** Lv1 と Lv3 で、問題の作り方と答え方だけを切り替える */
+const modes = {
+  lv1: {
+    next: (r: PracticeRecord, d: KanjiData, rng: Rng): AnyQuestion => nextQuestion(r, d, rng),
+    answer: (r: PracticeRecord, d: KanjiData, q: AnyQuestion, c: string, ms: number) => answer(r, d, q, c, ms),
+  },
+  lv3: {
+    next: (r: PracticeRecord, d: KanjiData, rng: Rng): AnyQuestion => nextFlashQuestion(r, d, rng),
+    answer: (r: PracticeRecord, d: KanjiData, q: AnyQuestion, c: string, ms: number) =>
+      answerFlash(r, d, q, c, ms),
+  },
+}
+
+export function PracticeScreen({ quickLook = false, record, onRecord, onSessionResult, onShowResult }: Props) {
   const m = useMessages()
-  const [question, setQuestion] = useState<Question>(() => nextQuestion(record, kanjiData, Math.random))
+  const stage = quickLook ? 'lv3' : 'lv1'
+  const mode = modes[stage]
+  const [question, setQuestion] = useState<AnyQuestion>(() => mode.next(record, kanjiData, Math.random))
+  // Lv3 で見本を見せている間は true（選択肢を隠す）
+  const [showing, setShowing] = useState(quickLook)
   const [picked, setPicked] = useState<string | null>(null)
   const [pendingResult, setPendingResult] = useState<SessionResult | undefined>()
   const [latest, setLatest] = useState(record)
@@ -32,30 +58,44 @@ export function PracticeScreen({ record, onRecord, onSessionResult, onShowResult
 
   const answered = picked !== null
   const correct = picked === question.target
-  const questionNumber =
-    picked === null ? record.currentSession.length + 1 : pendingResult ? QUESTIONS_PER_SESSION : record.currentSession.length
+  const done = progressOf(record, stage).currentSession.length
+  const questionNumber = picked === null ? done + 1 : pendingResult ? QUESTIONS_PER_SESSION : done
+  const showMs = 'showMs' in question ? question.showMs : 0
+  // Lv3: 見本を見せ終えたら「？」にする。見本は取り違えたときの見比べでだけ見せる
+  const hidden = quickLook && !showing && !(answered && !correct)
 
   const goNext = useCallback(() => {
     if (pendingResult) {
       onShowResult()
       return
     }
-    setQuestion(nextQuestion(latest, kanjiData, Math.random))
+    setQuestion(mode.next(latest, kanjiData, Math.random))
     setPicked(null)
+    setShowing(quickLook)
     shownAt.current = performance.now()
-  }, [latest, pendingResult, onShowResult])
+  }, [latest, pendingResult, onShowResult, mode, quickLook])
+
+  // Lv3: 表示時間が過ぎたら見本を隠して選択肢を出し、そこから答えるまでの時間を測る
+  useEffect(() => {
+    if (!showing) return
+    const id = setTimeout(() => {
+      setShowing(false)
+      shownAt.current = performance.now()
+    }, showMs)
+    return () => clearTimeout(id)
+  }, [showing, showMs, question])
 
   const choose = useCallback(
     (c: string) => {
-      if (picked !== null) return
-      const outcome = answer(record, kanjiData, question, c, Math.round(performance.now() - shownAt.current))
+      if (picked !== null || showing) return
+      const outcome = mode.answer(record, kanjiData, question, c, Math.round(performance.now() - shownAt.current))
       setPicked(c)
       setLatest(outcome.record)
       setPendingResult(outcome.sessionResult)
       onRecord(outcome.record)
       if (outcome.sessionResult) onSessionResult(outcome.sessionResult)
     },
-    [picked, record, question, onRecord, onSessionResult],
+    [picked, showing, record, question, onRecord, onSessionResult, mode],
   )
 
   // 正解ならすぐ次へ
@@ -85,11 +125,16 @@ export function PracticeScreen({ record, onRecord, onSessionResult, onShowResult
       <p className="progress">
         {questionNumber} / {QUESTIONS_PER_SESSION}
       </p>
-      <p className="instruction">{m.instruction}</p>
-      <div className="target" lang="ja">
-        {question.target}
+      <p className="instruction">{quickLook ? m.instructionFlash : m.instruction}</p>
+      {quickLook && (
+        <p className="show-time">
+          {m.showTime}: {(showMs / 1000).toFixed(1)} {m.seconds}
+        </p>
+      )}
+      <div className={'target' + (hidden ? ' is-hidden' : '')} lang="ja">
+        {hidden ? '？' : question.target}
       </div>
-      <div className={`choices choices-${question.choices.length}`}>
+      <div className={`choices choices-${question.choices.length}` + (showing ? ' is-concealed' : '')} aria-hidden={showing}>
         {question.choices.map((c, i) => (
           <button
             key={c}
@@ -99,7 +144,7 @@ export function PracticeScreen({ record, onRecord, onSessionResult, onShowResult
               (answered && c === question.target ? ' is-correct' : '') +
               (c === picked && !correct ? ' is-wrong' : '')
             }
-            disabled={answered}
+            disabled={answered || showing}
             onClick={() => choose(c)}
           >
             <span className="key">{i + 1}</span>

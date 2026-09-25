@@ -1,4 +1,4 @@
-// 練習の進め方（仕様書 rahiseko-alt/Kanji-ninsiki#2 モジュール2、Lv2 は #11）。画面・保存・時計には触れない
+// 練習の進め方（仕様書 rahiseko-alt/Kanji-ninsiki#2 モジュール2、Lv2 は #11、Lv3 は #15）。画面・保存・時計には触れない
 import type { KanjiData } from '../data/buildKanjiData.ts'
 import { createBoard, createQuestion, type BoardQuestion, type Question, type Rng } from './question.ts'
 
@@ -8,6 +8,10 @@ const RECENT_EXCLUDED = 2
 const CHOICE_COUNTS = [4, 6, 8]
 /** Lv2 の盤面の字数 */
 const BOARD_SIZES = [9, 12, 16]
+/** Lv3 の表示時間（ms）。正解が続くと右へ（短く）進む */
+const SHOW_TIMES = [1500, 1000, 700, 500]
+/** Lv3 の選択肢数（変えない） */
+const FLASH_CHOICE_COUNT = 4
 /** 選択肢数を1段上げるのに要る連続正解数 */
 const STREAK_TO_RAISE = 5
 /** 練習回でこの数以上正解すると学習中の字が増える（10問中9問 = 8割超） */
@@ -29,7 +33,7 @@ export type SessionResult = { correct: number; total: number; averageMs: number 
 
 /** 段階ごとの進み具合 */
 export type StageProgress = {
-  /** Lv1 は選択肢数、Lv2 は盤面の字数 */
+  /** 段の値。Lv1 は選択肢数、Lv2 は盤面の字数、Lv3 は表示時間（ms） */
   choiceCount: number
   /** 字数を上げるための連続正解数 */
   streak: number
@@ -39,11 +43,12 @@ export type StageProgress = {
   sessions: SessionResult[]
 }
 
-/** Lv1 の進み具合は以前の記録と同じ形で直下に持ち、Lv2 は lv2 に持つ */
+/** Lv1 の進み具合は以前の記録と同じ形で直下に持ち、Lv2・Lv3 は lv2・lv3 に持つ */
 export type PracticeRecord = StageProgress & {
   /** 学習中の字は出題順の先頭からこの数（段階で共通） */
   learningCount: number
   lv2: StageProgress
+  lv3: StageProgress
   stats: Record<string, KanjiStats>
   /** 直近の見本（新しい順） */
   recentTargets: string[]
@@ -62,6 +67,7 @@ export function initialRecord(): PracticeRecord {
     currentSession: [],
     sessions: [],
     lv2: initialStage(BOARD_SIZES[0]),
+    lv3: initialStage(SHOW_TIMES[0]),
   }
 }
 
@@ -69,18 +75,18 @@ function initialStage(choiceCount: number): StageProgress {
   return { choiceCount, streak: 0, currentSession: [], sessions: [] }
 }
 
-/** 段階。Lv1「1つ さがす」、Lv2「ぜんぶ さがす」 */
-export type Stage = 'lv1' | 'lv2'
-const COUNTS_OF: Record<Stage, number[]> = { lv1: CHOICE_COUNTS, lv2: BOARD_SIZES }
+/** 段階。Lv1「1つ さがす」、Lv2「ぜんぶ さがす」、Lv3「いっしゅん みる」 */
+export type Stage = 'lv1' | 'lv2' | 'lv3'
+const COUNTS_OF: Record<Stage, number[]> = { lv1: CHOICE_COUNTS, lv2: BOARD_SIZES, lv3: SHOW_TIMES }
 
 export function progressOf(record: PracticeRecord, stage: Stage): StageProgress {
-  if (stage === 'lv2') return record.lv2
+  if (stage === 'lv2' || stage === 'lv3') return record[stage]
   const { choiceCount, streak, currentSession, sessions } = record
   return { choiceCount, streak, currentSession, sessions }
 }
 
 function withProgress(record: PracticeRecord, stage: Stage, progress: StageProgress): PracticeRecord {
-  return stage === 'lv2' ? { ...record, lv2: progress } : { ...record, ...progress }
+  return stage === 'lv1' ? { ...record, ...progress } : { ...record, [stage]: progress }
 }
 
 export function nextQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): Question {
@@ -89,6 +95,19 @@ export function nextQuestion(record: PracticeRecord, data: KanjiData, rng: Rng):
 
 export function nextBoardQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): BoardQuestion {
   return createBoard(data, pickTarget(record, data, rng), record.lv2.choiceCount, rng)
+}
+
+/** Lv3 の問題。見本を showMs だけ見せてから選択肢を出す */
+export type FlashQuestion = Question & { showMs: number }
+
+export function nextFlashQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): FlashQuestion {
+  const question = createQuestion(data, pickTarget(record, data, rng), FLASH_CHOICE_COUNT, rng)
+  return { ...question, showMs: showMsOf(record) }
+}
+
+/** Lv3 の表示時間（ms）。以前の記録と形をそろえるため、段の値の欄に持っている */
+export function showMsOf(record: PracticeRecord): number {
+  return record.lv3.choiceCount
 }
 
 /** 再出題待ちを優先し、無ければ学習中の字から正答率の低い字ほど選ばれやすく選ぶ */
@@ -134,6 +153,18 @@ export function answer(
 ): AnswerOutcome {
   const correct = picked === question.target
   return applyAnswer(record, data, 'lv1', question.target, { correct, missed: false, picked: correct ? undefined : picked }, ms)
+}
+
+/** Lv3 の答え。採点と再出題は Lv1 と同じ */
+export function answerFlash(
+  record: PracticeRecord,
+  data: KanjiData,
+  question: Question,
+  picked: string,
+  ms: number,
+): AnswerOutcome {
+  const correct = picked === question.target
+  return applyAnswer(record, data, 'lv3', question.target, { correct, missed: false, picked: correct ? undefined : picked }, ms)
 }
 
 export type BoardOutcome = AnswerOutcome & {
@@ -266,6 +297,8 @@ export function restoreRecord(saved: unknown): PracticeRecord {
     sessions: r.sessions,
     // Lv2 を持たない以前の記録は、Lv2 を初期状態で始める
     lv2: r.lv2 === undefined ? initialStage(BOARD_SIZES[0]) : restoreStage(r.lv2),
+    // Lv3 を持たない以前の記録は、Lv3 を初期状態で始める
+    lv3: r.lv3 === undefined ? initialStage(SHOW_TIMES[0]) : restoreStage(r.lv3),
   }
 }
 
@@ -304,6 +337,7 @@ function isRecord(v: unknown): boolean {
     (v.learningCount as number) >= FIRST_LEARNING_COUNT &&
     isStage(v, CHOICE_COUNTS) &&
     (v.lv2 === undefined || isStage(v.lv2, BOARD_SIZES)) &&
+    (v.lv3 === undefined || isStage(v.lv3, SHOW_TIMES)) &&
     isObject(v.stats) &&
     Object.values(v.stats).every(
       (s) =>
