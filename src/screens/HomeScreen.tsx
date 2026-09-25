@@ -31,6 +31,7 @@ export function HomeScreen({ stage, startAt, language, onPractice, onStart, onLa
         </div>
         <h1>{m.appTitle}</h1>
         <p className="tagline">{m.appTagline}</p>
+        <p className="hint">{m.storageNote}</p>
         <button className="next home-start" onClick={() => onPractice(stage)}>
           {m.startPractice}
         </button>

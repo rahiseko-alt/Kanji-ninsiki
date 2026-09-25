@@ -125,8 +125,6 @@ button { font-family: inherit; }
 }
 .instruction { margin: 0 0 12px; font-size: 16px; }
 .lang-switch { margin-left: auto; font-size: 14px !important; }
-.intro { text-align: center; padding-top: 48px; }
-.intro p { font-size: 18px; line-height: 1.7; text-align: left; }
 .credits ul { padding-left: 20px; }
 .credits li { margin-bottom: 14px; line-height: 1.5; }
 .credits .license { font-size: 14px; }
@@ -212,3 +210,4 @@ a { color: var(--accent); }
   border: 1px solid var(--line); background: var(--card); color: var(--fg);
 }
 select.lang-switch { margin-left: auto; }
+.home .hint { font-size: 13px; opacity: 0.7; margin: 0 0 16px; }
