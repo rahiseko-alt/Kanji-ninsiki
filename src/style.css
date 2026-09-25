@@ -199,8 +199,13 @@ a { color: var(--accent); }
 
 /* ホーム（和紙と墨） */
 .home { position: relative; max-width: 560px; margin: 0 auto; padding: 16px 20px 0; text-align: center; overflow: hidden; }
-.home-lang { position: absolute; top: 14px; right: 18px; font-size: 18px; letter-spacing: 0.04em; }
-.home-lang select { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+/* 表示言語: どの画面でも右上に出す */
+.lang-switch {
+  position: fixed; top: 10px; right: 14px; z-index: 20;
+  padding: 4px 10px; border-radius: 999px; background: var(--bg);
+  font-size: 17px; letter-spacing: 0.04em;
+}
+.lang-switch select { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .home-hero { padding-top: 4px; }
 .home-logo { width: 136px; height: auto; }
 .home-hero h1 { font-size: clamp(28px, 8vw, 38px); margin: 6px 0 4px; font-weight: 700; letter-spacing: 0.02em; }
@@ -242,4 +247,54 @@ a { color: var(--accent); }
 @media (prefers-color-scheme: dark) {
   .home-logo { filter: invert(0.92); }
   .home-landscape { mix-blend-mode: normal; filter: invert(0.9) hue-rotate(180deg); opacity: 0.8; }
+}
+
+/* 表紙 */
+.cover { padding-top: 12vh; }
+.cover .ink-button { margin-top: 36px; }
+
+/* モード選択 */
+.modes { padding-top: 0; }
+.modes .practice-top { padding: 8px 0 0; text-align: left; }
+.modes .home-start h2 { margin-top: 12px; }
+.start-card[aria-current='true'] { border-color: var(--accent); }
+
+/* アプリ説明: 文章が下から上へ流れる */
+.intro-viewport {
+  position: fixed; inset: 0; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 82%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 82%, transparent);
+}
+.intro-roll {
+  position: absolute; left: 0; right: 0; top: 100%;
+  max-width: 480px; margin: 0 auto; padding: 0 24px;
+  text-align: center;
+  animation-name: intro-roll; animation-timing-function: linear; animation-fill-mode: forwards;
+}
+@keyframes intro-roll {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - 100vh)); }
+}
+.intro-block { margin: 0 0 56px; }
+.intro-block p { margin: 0; font-size: clamp(18px, 5vw, 22px); line-height: 1.9; letter-spacing: 0.04em; word-break: keep-all; overflow-wrap: anywhere; }
+.intro-block img {
+  display: block; width: min(46vw, 180px); height: auto; margin: 0 auto 8px; mix-blend-mode: multiply;
+  /* 挿絵の紙の縁を消して、背景になじませる */
+  -webkit-mask-image: radial-gradient(ellipse closest-side, #000 70%, transparent);
+  mask-image: radial-gradient(ellipse closest-side, #000 70%, transparent);
+}
+.intro-block.is-bullet { margin-bottom: 36px; }
+.intro-block.is-bullet p { font-weight: 700; }
+.intro-block.is-bullet img { width: min(36vw, 140px); }
+.intro-skip {
+  position: fixed; right: 16px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 5;
+  background: var(--card); color: var(--fg); border: 1px solid var(--line); border-radius: 999px;
+  padding: 8px 18px; font-size: 15px; cursor: pointer; opacity: 0.85;
+}
+.intro-next { position: fixed; left: 16px; right: 16px; width: auto; max-width: 420px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 5; margin: 0 auto; }
+/* 流し終えた後と、動きを減らす設定の端末では、全文を普通に読めるようにする */
+.intro.is-static .intro-viewport { position: static; overflow: visible; -webkit-mask-image: none; mask-image: none; }
+.intro.is-static .intro-roll { position: static; animation: none; padding: 64px 24px 120px; }
+@media (prefers-color-scheme: dark) {
+  .intro-block img { mix-blend-mode: normal; filter: invert(0.9) hue-rotate(180deg); opacity: 0.85; }
 }

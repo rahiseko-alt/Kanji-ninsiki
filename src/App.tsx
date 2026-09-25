@@ -6,14 +6,18 @@ import { HomeScreen } from './screens/HomeScreen.tsx'
 import { PracticeScreen } from './screens/PracticeScreen.tsx'
 import { BoardScreen } from './screens/BoardScreen.tsx'
 import { OddScreen } from './screens/OddScreen.tsx'
-import { StageSwitch } from './screens/StageSwitch.tsx'
+import { CoverScreen } from './screens/CoverScreen.tsx'
+import { IntroScreen } from './screens/IntroScreen.tsx'
+import { ModeScreen } from './screens/ModeScreen.tsx'
+import { LanguageSelect } from './screens/LanguageSelect.tsx'
 import { kanjiData } from './kanjiData.ts'
 import { ResultScreen } from './screens/ResultScreen.tsx'
 import { RecordsScreen } from './screens/RecordsScreen.tsx'
 import { CreditsScreen } from './screens/CreditsScreen.tsx'
 import { initialRecord, withStart, type PracticeRecord, type SessionResult, type Stage } from './practice/practice.ts'
 
-type Screen = 'home' | 'practice' | 'records' | 'credits'
+// 表紙 → アプリ説明 → ホーム（始める位置）→ モード選択 → 練習
+type Screen = 'cover' | 'intro' | 'home' | 'modes' | 'practice' | 'records' | 'credits'
 
 export function App() {
   const [record, setRecord] = useState<PracticeRecord>(loadRecord)
@@ -21,8 +25,8 @@ export function App() {
   // 練習回の結果。10問目に答えた時点で受け取り、結果画面を閉じるまで持つ
   const [result, setResult] = useState<SessionResult | null>(null)
   const [showResult, setShowResult] = useState(false)
-  // 開いたときはホームを出す
-  const [screen, setScreen] = useState<Screen>('home')
+  // 開いたときは表紙を出す
+  const [screen, setScreen] = useState<Screen>('cover')
   const m = messages[settings.language]
 
   // 読み上げや字形の選び方がそろうよう、ページ全体の言語も合わせる
@@ -64,25 +68,38 @@ export function App() {
   }
   const changeLanguage = (language: Language) => updateSettings({ ...settings, language })
 
-  // 下のタブ。「練習」はホームと練習の画面の両方を受け持つ
+  // アプリ説明を最後まで見るか飛ばしたら、次回からは途中で飛ばせる
+  const finishIntro = () => {
+    if (!settings.seenIntro) updateSettings({ ...settings, seenIntro: true })
+    setScreen('home')
+  }
+
+  const chooseMode = (stage: Stage) => {
+    chooseStage(stage)
+    goTo('practice')
+  }
+
+  // 下のタブ。「練習」はホーム・モード選択・練習の画面を受け持つ。表紙と説明では出さない
   const tabs: [Screen, string][] = [
     ['home', m.navPractice],
     ['records', m.navRecords],
     ['credits', m.navCredits],
   ]
-  const activeTab = screen === 'practice' ? 'home' : screen
+  const activeTab = screen === 'practice' || screen === 'modes' ? 'home' : screen
+  const showTabs = screen !== 'cover' && screen !== 'intro'
 
   return (
     <MessagesContext.Provider value={m}>
       <div lang={settings.language} className="app">
-        {screen === 'home' ? (
-          <HomeScreen
-            startAt={record.startAt}
-            language={settings.language}
-            onPractice={() => goTo('practice')}
-            onStart={changeStart}
-            onLanguage={changeLanguage}
-          />
+        <LanguageSelect language={settings.language} onChange={changeLanguage} />
+        {screen === 'cover' ? (
+          <CoverScreen onStart={() => setScreen('intro')} />
+        ) : screen === 'intro' ? (
+          <IntroScreen canSkip={settings.seenIntro} onDone={finishIntro} />
+        ) : screen === 'home' ? (
+          <HomeScreen startAt={record.startAt} onPractice={() => goTo('modes')} onStart={changeStart} />
+        ) : screen === 'modes' ? (
+          <ModeScreen stage={settings.stage} onChoose={chooseMode} onBack={() => goTo('home')} />
         ) : screen === 'records' ? (
           <RecordsScreen
             record={record}
@@ -98,11 +115,10 @@ export function App() {
         ) : (
           <>
             <div className="practice-top">
-              <button className="back" onClick={() => goTo('home')}>
-                ‹ {m.navHome}
+              <button className="back" onClick={() => goTo('modes')}>
+                ‹ {m.modeTitle}
               </button>
             </div>
-            <StageSwitch stage={settings.stage} onChange={chooseStage} />
             {result && showResult ? (
               <ResultScreen result={result} onContinue={clearResult} />
             ) : (
@@ -135,13 +151,15 @@ export function App() {
             )}
           </>
         )}
-        <nav className="tabbar">
-          {tabs.map(([id, label]) => (
-            <button key={id} aria-current={activeTab === id ? 'page' : undefined} onClick={() => goTo(id)}>
-              {label}
-            </button>
-          ))}
-        </nav>
+        {showTabs && (
+          <nav className="tabbar">
+            {tabs.map(([id, label]) => (
+              <button key={id} aria-current={activeTab === id ? 'page' : undefined} onClick={() => goTo(id)}>
+                {label}
+              </button>
+            ))}
+          </nav>
+        )}
       </div>
     </MessagesContext.Provider>
   )
