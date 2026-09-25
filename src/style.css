@@ -249,9 +249,22 @@ a { color: var(--accent); }
   .home-landscape { mix-blend-mode: normal; filter: invert(0.9) hue-rotate(180deg); opacity: 0.8; }
 }
 
-/* 表紙 */
-.cover { padding-top: 12vh; }
-.cover .ink-button { margin-top: 36px; }
+/* 表紙（利用者のデザイン: 石組みの図、認字、NINJI、START） */
+.cover {
+  min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 20vh 24px 8vh;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.cover-stones { width: min(78vw, 380px); height: auto; }
+.cover-title { margin: 7vh 0 0; font-size: clamp(56px, 17vw, 84px); font-weight: 400; letter-spacing: 0.12em; line-height: 1.1; }
+.cover-reading { margin: 12px 0 0; font-size: clamp(15px, 4.4vw, 19px); letter-spacing: 0.6em; padding-left: 0.6em; }
+.cover-start {
+  margin-top: 9vh; width: min(100%, 280px); padding: 16px 0; padding-left: 0.4em;
+  border: 0; cursor: pointer; color: #f4f1ec; font-size: clamp(18px, 5vw, 22px); letter-spacing: 0.4em;
+  background: #2b2a29 url('./assets/cover/button.webp') center / cover;
+}
+@media (prefers-color-scheme: dark) {
+  .cover-start { outline: 1px solid var(--line); }
+}
 
 /* モード選択 */
 .modes { padding-top: 0; }

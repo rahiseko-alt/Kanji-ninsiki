@@ -10,7 +10,7 @@ import parts from '../assets/intro/parts.webp'
 import goal from '../assets/intro/goal.webp'
 
 /** 文章が下から上へ流れる速さ（1秒あたりの px） */
-const ROLL_SPEED = 36
+const ROLL_SPEED = 44
 
 /** 慣れない文字の例（デーヴァナーガリー）と、よく似た漢字の組。どの言語でも同じものを見せる */
 const DEVANAGARI = ['क ख ग घ च छ']
