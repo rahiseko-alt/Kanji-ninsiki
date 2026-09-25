@@ -176,3 +176,11 @@ a { color: var(--accent); }
 .target.parts { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: clamp(64px, 20vw, 110px); padding: 8px 0; }
 .target.parts-column { flex-direction: column; gap: 0; line-height: 1.1; }
 .target.parts .plus { font-size: 0.4em; opacity: 0.5; }
+.start-choice { margin: 20px 0; text-align: center; }
+.start-choice h2 { font-size: 17px; margin: 0 0 10px; }
+.start-choice .hint { font-size: 13px; opacity: 0.7; }
+.start-options { margin: 0 auto; }
+@media (max-width: 640px) {
+  .start-options { grid-template-columns: 1fr; }
+  .start-options button:last-child:nth-child(odd) { grid-column: auto; }
+}

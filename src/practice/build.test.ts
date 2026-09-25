@@ -15,7 +15,7 @@ function playBuild(record: PracticeRecord, n: number, isCorrect: (i: number) => 
   const questions = []
   const outcomes = []
   for (let i = 0; i < n; i++) {
-    const q = nextBuildQuestion(record, data, rng)
+    const q = nextBuildQuestion(record, data, rng)!
     questions.push(q)
     const picked = isCorrect(i) ? q.target : q.choices.find((c) => c !== q.target)!
     const r = answerBuild(record, data, q, picked, 1200 + i)
@@ -25,11 +25,11 @@ function playBuild(record: PracticeRecord, n: number, isCorrect: (i: number) => 
   return { record, questions, outcomes }
 }
 
-const countAfter = (r: PracticeRecord) => nextBuildQuestion(r, testData, seededRng(1)).choices.length
+const countAfter = (r: PracticeRecord) => nextBuildQuestion(r, testData, seededRng(1))!.choices.length
 
 describe('Lv5 の問題', () => {
   it('部品2つと並べ方、正解1つを含む4字の選択肢を出す', () => {
-    const q = nextBuildQuestion(initialRecord(), testData, seededRng(3))
+    const q = nextBuildQuestion(initialRecord(), testData, seededRng(3))!
     expect(q.parts).toEqual(testData.kanji[q.target].parts)
     expect(q.choices).toHaveLength(4)
     expect(q.choices.filter((c) => c === q.target)).toHaveLength(1)
@@ -114,7 +114,7 @@ describe('Lv5 の出題対象の絞り込み', () => {
   })
 
   it('部品に分かれない字を取り違えて選んでも、再出題待ちには入れない（Lv5 では出せないため）', () => {
-    const q = nextBuildQuestion(initialRecord(), testData, seededRng(1))
+    const q = nextBuildQuestion(initialRecord(), testData, seededRng(1))!
     const withNoParts = { ...q, choices: [...q.choices.slice(0, 3), '一'] }
     const r = answerBuild(initialRecord(), testData, withNoParts, '一', 900)
     expect(r.record.pendingReview).not.toContain('一')
