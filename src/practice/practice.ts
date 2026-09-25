@@ -146,9 +146,10 @@ export function nextBuildQuestion(record: PracticeRecord, data: KanjiData, rng: 
 }
 
 /**
- * 再出題待ちを優先し、無ければ学習中の字から正答率の低い字ほど選ばれやすく選ぶ。
- * eligible で出せる字を絞る（Lv5 は部品に分かれる字だけ）。学習中の字に出せる字が無ければ、
- * 出題順で学習中の字の次にある、出せる字を出す
+ * 再出題待ちを優先し、無ければ出題する字の集まりから正答率の低い字ほど選ばれやすく選ぶ。
+ * 集まりはふつう学習中の字。eligible で出せる字を絞る段階（Lv5 は部品に分かれる字だけ）では、
+ * 学習中の字のうち出せる字が最初の8字に満たなければ、出題順で次の出せる字を足して8字にする
+ * （同じ字ばかり出ないように）
  */
 function pickTarget(
   record: PracticeRecord,
@@ -160,16 +161,18 @@ function pickTarget(
   const review = record.pendingReview.find((c) => !recent.includes(c) && c in data.kanji && eligible(c))
   if (review) return review
 
-  const learning = data.order.slice(0, record.learningCount).filter(eligible)
-  if (learning.length > 0) {
-    // 直前の字を避けきれないとき（出せる字が少ないとき）は、同じ字をもう一度出す
-    const fresh = learning.filter((c) => !recent.includes(c))
-    const candidates = fresh.length > 0 ? fresh : learning
-    return weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
-  }
-  const next = data.order.find(eligible)
-  if (next === undefined) throw new Error('出題できる字がありません')
-  return next
+  const pool = poolOf(record, data, eligible)
+  if (pool.length === 0) throw new Error('出題できる字がありません')
+  // 直前の字を避けきれないとき（出せる字が少ないとき）は、同じ字をもう一度出す
+  const fresh = pool.filter((c) => !recent.includes(c))
+  const candidates = fresh.length > 0 ? fresh : pool
+  return weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
+}
+
+function poolOf(record: PracticeRecord, data: KanjiData, eligible: (c: string) => boolean): string[] {
+  const eligibleInOrder = data.order.filter(eligible)
+  const inLearning = data.order.slice(0, record.learningCount).filter(eligible).length
+  return eligibleInOrder.slice(0, Math.max(inLearning, FIRST_LEARNING_COUNT))
 }
 
 /** 正答率が低いほど重い。まだ出ていない字は最も重い */
