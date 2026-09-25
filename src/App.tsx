@@ -1,19 +1,19 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { loadRecord, saveRecord } from './storage.ts'
 import { loadSettings, saveSettings, type Settings } from './settings.ts'
-import { messages, MessagesContext } from './i18n.tsx'
+import { messages, MessagesContext, type Language } from './i18n.tsx'
+import { HomeScreen } from './screens/HomeScreen.tsx'
 import { PracticeScreen } from './screens/PracticeScreen.tsx'
 import { BoardScreen } from './screens/BoardScreen.tsx'
 import { OddScreen } from './screens/OddScreen.tsx'
 import { StageSwitch } from './screens/StageSwitch.tsx'
-import { StartChoice } from './screens/StartChoice.tsx'
 import { kanjiData } from './kanjiData.ts'
 import { ResultScreen } from './screens/ResultScreen.tsx'
 import { RecordsScreen } from './screens/RecordsScreen.tsx'
 import { CreditsScreen } from './screens/CreditsScreen.tsx'
 import { initialRecord, withStart, type PracticeRecord, type SessionResult, type Stage } from './practice/practice.ts'
 
-type Screen = 'practice' | 'records' | 'credits'
+type Screen = 'home' | 'practice' | 'records' | 'credits'
 
 export function App() {
   const [record, setRecord] = useState<PracticeRecord>(loadRecord)
@@ -21,8 +21,14 @@ export function App() {
   // 練習回の結果。10問目に答えた時点で受け取り、結果画面を閉じるまで持つ
   const [result, setResult] = useState<SessionResult | null>(null)
   const [showResult, setShowResult] = useState(false)
-  const [screen, setScreen] = useState<Screen>('practice')
+  // 開いたときはホームを出す
+  const [screen, setScreen] = useState<Screen>('home')
   const m = messages[settings.language]
+
+  // 読み上げや字形の選び方がそろうよう、ページ全体の言語も合わせる
+  useEffect(() => {
+    document.documentElement.lang = settings.language
+  }, [settings.language])
 
   const updateRecord = (next: PracticeRecord) => {
     saveRecord(next)
@@ -50,37 +56,38 @@ export function App() {
     updateSettings({ ...settings, stage })
   }
 
+  // 始める位置の変更は、練習したことがあれば確認のうえ（記録は残る）
+  const changeStart = (startAt: number) => {
+    if (startAt === record.startAt) return
+    const practiced = Object.keys(record.stats).length > 0
+    if (!practiced || window.confirm(m.confirmStart)) updateRecord(withStart(record, kanjiData, startAt))
+  }
+  const changeLanguage = (language: Language) => updateSettings({ ...settings, language })
+
+  // 下のタブ。「れんしゅう」はホームと練習の画面の両方を受け持つ
   const tabs: [Screen, string][] = [
-    ['practice', m.navPractice],
+    ['home', m.navPractice],
     ['records', m.navRecords],
     ['credits', m.navCredits],
   ]
+  const activeTab = screen === 'practice' ? 'home' : screen
 
   return (
     <MessagesContext.Provider value={m}>
-      <div lang={settings.language}>
-        <nav className="nav">
-          {tabs.map(([id, label]) => (
-            <button key={id} aria-current={screen === id ? 'page' : undefined} onClick={() => goTo(id)}>
-              {label}
-            </button>
-          ))}
-          <button
-            className="lang-switch"
-            onClick={() => updateSettings({ ...settings, language: settings.language === 'en' ? 'ja' : 'en' })}
-          >
-            {m.switchLanguage}
-          </button>
-        </nav>
-        {screen === 'records' ? (
+      <div lang={settings.language} className="app">
+        {screen === 'home' ? (
+          <HomeScreen
+            startAt={record.startAt}
+            language={settings.language}
+            onPractice={() => goTo('practice')}
+            onStart={changeStart}
+            onLanguage={changeLanguage}
+          />
+        ) : screen === 'records' ? (
           <RecordsScreen
             record={record}
             initialStage={settings.stage}
-            onStart={(startAt) => {
-              if (startAt !== record.startAt && window.confirm(m.confirmStart)) {
-                updateRecord(withStart(record, kanjiData, startAt))
-              }
-            }}
+            onStart={changeStart}
             onReset={() => {
               updateRecord(initialRecord())
               clearResult()
@@ -88,17 +95,13 @@ export function App() {
           />
         ) : screen === 'credits' ? (
           <CreditsScreen />
-        ) : !settings.seenIntro ? (
-          <main className="page intro">
-            <h1>{m.introTitle}</h1>
-            <p>{m.introBody}</p>
-            <StartChoice startAt={record.startAt} onChange={(startAt) => updateRecord(withStart(record, kanjiData, startAt))} />
-            <button className="next" onClick={() => updateSettings({ ...settings, seenIntro: true })} autoFocus>
-              {m.introOk}
-            </button>
-          </main>
         ) : (
           <>
+            <div className="practice-top">
+              <button className="back" onClick={() => goTo('home')}>
+                ‹ {m.navHome}
+              </button>
+            </div>
             <StageSwitch stage={settings.stage} onChange={chooseStage} />
             {result && showResult ? (
               <ResultScreen result={result} onContinue={clearResult} />
@@ -132,6 +135,13 @@ export function App() {
             )}
           </>
         )}
+        <nav className="tabbar">
+          {tabs.map(([id, label]) => (
+            <button key={id} aria-current={activeTab === id ? 'page' : undefined} onClick={() => goTo(id)}>
+              {label}
+            </button>
+          ))}
+        </nav>
       </div>
     </MessagesContext.Provider>
   )

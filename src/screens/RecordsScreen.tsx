@@ -64,6 +64,7 @@ export function RecordsScreen({ record, initialStage, onStart, onReset }: Props)
         </>
       )}
       <StartChoice startAt={record.startAt} onChange={onStart} />
+      <p className="hint">{m.storageNote}</p>
       <button
         className="danger"
         onClick={() => {
