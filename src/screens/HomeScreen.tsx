@@ -1,18 +1,15 @@
-import { LANGUAGE_NAMES, LANGUAGE_SHORT, useMessages, type Language } from '../i18n.tsx'
+import { APP_NAME, useMessages } from '../i18n.tsx'
 import { START_POSITIONS } from '../practice/practice.ts'
-import logo from '../assets/home/logo.webp'
-import landscape from '../assets/home/landscape.webp'
+import stones from '../assets/cover/stones.webp'
 
 type Props = {
   startAt: number
-  language: Language
   onPractice: () => void
   onStart: (startAt: number) => void
-  onLanguage: (language: Language) => void
 }
 
-/** ホーム: アプリ名、始める位置、練習を始めるボタン、表示言語（右上） */
-export function HomeScreen({ startAt, language, onPractice, onStart, onLanguage }: Props) {
+/** ホーム: アプリ名、始める位置、モード選択へ進むボタン */
+export function HomeScreen({ startAt, onPractice, onStart }: Props) {
   const m = useMessages()
   const options: { value: number; name: string; desc: string }[] = [
     { value: START_POSITIONS.beginner, name: m.startBeginner, desc: m.startDescBeginner },
@@ -21,20 +18,9 @@ export function HomeScreen({ startAt, language, onPractice, onStart, onLanguage 
   ]
   return (
     <main className="home">
-      <label className="home-lang">
-        <span aria-hidden="true">{LANGUAGE_SHORT[language]}</span>
-        <select aria-label={m.languageLabel} value={language} onChange={(e) => onLanguage(e.target.value as Language)}>
-          {(Object.keys(LANGUAGE_NAMES) as Language[]).map((l) => (
-            <option key={l} value={l} lang={l}>
-              {LANGUAGE_NAMES[l]}
-            </option>
-          ))}
-        </select>
-      </label>
-
       <header className="home-hero">
-        <img className="home-logo" src={logo} alt="" width={160} height={150} />
-        <h1>{m.appTitle}</h1>
+        <img className="home-stones" src={stones} alt="" width={720} height={422} />
+        <h1 lang="ja">{APP_NAME}</h1>
         <p className="home-subtitle">{m.appSubtitle}</p>
       </header>
 
@@ -70,7 +56,6 @@ export function HomeScreen({ startAt, language, onPractice, onStart, onLanguage 
       </button>
       <p className="home-note">{m.readingNote}</p>
 
-      <img className="home-landscape" src={landscape} alt="" />
     </main>
   )
 }

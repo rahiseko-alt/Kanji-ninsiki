@@ -4,6 +4,9 @@ import { createContext, useContext } from 'react'
 
 export type Language = 'en' | 'ja' | 'vi' | 'ne'
 
+/** アプリ名。どの言語でも同じ（利用者の指定） */
+export const APP_NAME = '認字'
+
 /** ホーム右上に出す、いまの言語の短い表示 */
 export const LANGUAGE_SHORT: Record<Language, string> = { en: 'EN', ja: 'にほんご', vi: 'VI', ne: 'NE' }
 
@@ -22,7 +25,6 @@ const en = {
   startDescWell: 'Try harder kanji too',
   readingNote: "You don't need to know how to read them",
   navHome: 'Home',
-  appTitle: 'Kanji Shape Trainer',
   startPractice: 'Start practice',
   languageLabel: 'Language',
   storageNote: 'Your records are saved only on this device. They are not shared with other devices.',
@@ -71,6 +73,32 @@ const en = {
   creditsTitle: 'Credits',
   creditsIntro: 'This app uses the following data and fonts. Thank you to their authors.',
   noticesLink: 'Full license texts',
+  coverStart: 'Start',
+  skip: 'Skip',
+  modeTitle: 'Choose a mode',
+  stageDescFindOne: 'Choose the same kanji',
+  stageDescFindAll: 'Choose every matching kanji',
+  stageDescQuickLook: 'Look for a moment, then choose',
+  stageDescOddOneOut: 'Find the one that is different',
+  stageDescBuild: 'Put two parts together',
+  introLead: 'This app is not for memorizing kanji.',
+  introUsed: 'Telling letters apart takes getting used to.',
+  introExample:
+    'For example, Japanese people who are not used to the Devanagari script may at first find it hard to quickly tell these apart:',
+  introSame:
+    'In the same way, people who grew up without kanji in daily life may find it hard to see small differences like these right away:',
+  introWorld: 'Most people in the world grew up with a writing system that does not use kanji in daily life.',
+  introResearch:
+    'Research also reports that such learners find it hard to notice fine differences in shape and to recognize the parts that make up a kanji.',
+  introEven: 'Even as you learn to read and speak more Japanese, you may still:',
+  introB1: '• mix up kanji that look alike',
+  introB2: '• miss part of a kanji',
+  introB3: '• not see right away where two kanji differ',
+  introB4: '• find it hard to see a kanji as a set of parts',
+  introAfter: '',
+  introApp:
+    'In this app, you practice the "shape-seeing skill" you need before memorizing kanji: looking at kanji, breaking them into parts, and telling them apart.',
+  introGoal: 'It is training that builds the basic "kanji-seeing strength" that makes kanji easier to learn.',
 }
 
 export type Messages = typeof en
@@ -82,7 +110,6 @@ const ja: Messages = {
   startDescWell: 'むずかしい かんじも',
   readingNote: 'よめなくて だいじょうぶ',
   navHome: 'ホーム',
-  appTitle: 'かんじ トレーナー',
   startPractice: 'はじめる',
   languageLabel: 'ことば',
   storageNote: 'きろくは この きかいだけに のこります。',
@@ -131,6 +158,32 @@ const ja: Messages = {
   creditsTitle: 'クレジット',
   creditsIntro: 'つかっている データと フォント',
   noticesLink: 'ライセンス',
+  coverStart: 'はじめる',
+  skip: 'とばす',
+  modeTitle: 'モードを えらぶ',
+  stageDescFindOne: 'おなじ じを 1つ えらぶ',
+  stageDescFindAll: 'おなじ じを ぜんぶ えらぶ',
+  stageDescQuickLook: 'すこし みて、えらぶ',
+  stageDescOddOneOut: 'ちがう じを 1つ えらぶ',
+  stageDescBuild: '2つの ぶひんを あわせる',
+  introLead: 'この アプリは、かんじを おぼえる ための アプリでは ありません。',
+  introUsed: 'もじを みわけるには、なれが ひつようです。',
+  introExample:
+    'たとえば、デーヴァナーガリーもじに なれていない にほんじんは、つぎの もじを みても、さいしょは パッと くべつするのが むずかしいかも しれません。',
+  introSame:
+    'おなじように、かんじを ふだん つかわない もじの なかで そだった ひとには、つぎのような かんじの ちいさな ちがいを、すぐに みわけるのが むずかしい ことが あります。',
+  introWorld: 'せかいでは、かんじを ふだん つかわない もじの なかで そだった ひとの ほうが おおいです。',
+  introResearch:
+    'けんきゅうでも、こまかい かたちの ちがいや、かんじを つくる ぶひんを みわけるのが むずかしい ことが ほうこくされています。',
+  introEven: 'よめる ことばや はなせる にほんごが ふえても、',
+  introB1: '・にている かんじを まちがえる',
+  introB2: '・かんじの いちぶを みおとす',
+  introB3: '・どこが ちがうのか、すぐに わからない',
+  introB4: '・かんじを ぶひんに わけて みるのが むずかしい',
+  introAfter: 'と いった ことが あります。',
+  introApp:
+    'この アプリでは、かんじを おぼえる まえに ひつような「かたちを みる ちから」を、「みる」「わける」「みわける」 れんしゅうで きたえます。',
+  introGoal: 'かんじを もっと まなびやすく する ための「かんじを みる きそたいりょく」を きたえる トレーニングです。',
 }
 
 const vi: Messages = {
@@ -140,7 +193,6 @@ const vi: Messages = {
   startDescWell: 'Thử cả những chữ khó hơn',
   readingNote: 'Không cần biết cách đọc cũng không sao',
   navHome: 'Trang chủ',
-  appTitle: 'Luyện nhận diện chữ Hán',
   startPractice: 'Bắt đầu luyện tập',
   languageLabel: 'Ngôn ngữ',
   storageNote: 'Lịch sử luyện tập chỉ được lưu trên thiết bị này, không chuyển sang thiết bị khác.',
@@ -189,6 +241,32 @@ const vi: Messages = {
   creditsTitle: 'Nguồn',
   creditsIntro: 'Ứng dụng này sử dụng các dữ liệu và phông chữ sau. Xin cảm ơn các tác giả.',
   noticesLink: 'Toàn văn giấy phép',
+  coverStart: 'Bắt đầu',
+  skip: 'Bỏ qua',
+  modeTitle: 'Chọn kiểu luyện',
+  stageDescFindOne: 'Chọn chữ giống mẫu',
+  stageDescFindAll: 'Chọn tất cả chữ giống mẫu',
+  stageDescQuickLook: 'Nhìn thoáng qua rồi chọn',
+  stageDescOddOneOut: 'Tìm chữ khác',
+  stageDescBuild: 'Ghép hai bộ phận',
+  introLead: 'Ứng dụng này không phải để ghi nhớ chữ Hán.',
+  introUsed: 'Để phân biệt chữ viết, cần phải quen mắt.',
+  introExample:
+    'Ví dụ, người Nhật chưa quen chữ Devanagari có thể lúc đầu khó phân biệt nhanh những chữ này:',
+  introSame:
+    'Tương tự, người lớn lên trong môi trường không dùng chữ Hán hằng ngày có thể khó nhận ra ngay những khác biệt nhỏ như thế này:',
+  introWorld: 'Trên thế giới, phần lớn mọi người lớn lên trong môi trường chữ viết không dùng chữ Hán hằng ngày.',
+  introResearch:
+    'Các nghiên cứu cũng cho thấy người học như vậy khó nhận ra khác biệt nhỏ về hình dạng và các bộ phận tạo nên chữ Hán.',
+  introEven: 'Dù đã đọc và nói được nhiều tiếng Nhật hơn, bạn vẫn có thể:',
+  introB1: '• nhầm những chữ Hán trông giống nhau',
+  introB2: '• bỏ sót một phần của chữ',
+  introB3: '• không nhận ra ngay hai chữ khác nhau ở đâu',
+  introB4: '• khó nhìn một chữ Hán thành các bộ phận',
+  introAfter: '',
+  introApp:
+    'Trong ứng dụng này, bạn luyện "khả năng nhìn hình dạng" cần có trước khi ghi nhớ chữ Hán: nhìn, tách và phân biệt chữ Hán.',
+  introGoal: 'Đây là bài luyện giúp tăng "sức nền để nhìn chữ Hán", để việc học chữ Hán trở nên dễ hơn.',
 }
 
 const ne: Messages = {
@@ -198,7 +276,6 @@ const ne: Messages = {
   startDescWell: 'अलि कठिन कान्जी पनि प्रयास गर्नुहोस्',
   readingNote: 'उच्चारण नजाने पनि ठीक छ',
   navHome: 'गृहपृष्ठ',
-  appTitle: 'कान्जी आकार अभ्यास',
   startPractice: 'अभ्यास सुरु गर्नुहोस्',
   languageLabel: 'भाषा',
   storageNote: 'अभिलेख यही उपकरणमा मात्र राखिन्छ, अरू उपकरणमा सर्दैन।',
@@ -247,6 +324,32 @@ const ne: Messages = {
   creditsTitle: 'स्रोत',
   creditsIntro: 'यो एपले तलका डेटा र फन्ट प्रयोग गर्छ। लेखकहरूलाई धन्यवाद।',
   noticesLink: 'लाइसेन्सको पूरा पाठ',
+  coverStart: 'सुरु गर्नुहोस्',
+  skip: 'छोड्नुहोस्',
+  modeTitle: 'अभ्यास छान्नुहोस्',
+  stageDescFindOne: 'उस्तै कान्जी छान्नुहोस्',
+  stageDescFindAll: 'उस्तै सबै कान्जी छान्नुहोस्',
+  stageDescQuickLook: 'छिनभर हेरेर छान्नुहोस्',
+  stageDescOddOneOut: 'फरक कान्जी खोज्नुहोस्',
+  stageDescBuild: 'दुई भाग जोड्नुहोस्',
+  introLead: 'यो एप कान्जी कण्ठ गर्नका लागि होइन।',
+  introUsed: 'अक्षर छुट्याउन बानी पर्नु आवश्यक छ।',
+  introExample:
+    'उदाहरणका लागि, देवनागरी लिपिमा बानी नपरेका जापानीलाई सुरुमा यी अक्षर तुरुन्तै छुट्याउन गाह्रो हुन सक्छ:',
+  introSame:
+    'त्यसै गरी, दैनिक जीवनमा कान्जी प्रयोग नहुने वातावरणमा हुर्केकालाई यस्ता कान्जीका साना भिन्नता तुरुन्तै देख्न गाह्रो हुन सक्छ:',
+  introWorld: 'संसारमा धेरैजसो मानिस दैनिक जीवनमा कान्जी प्रयोग नहुने लिपिको वातावरणमा हुर्केका छन्।',
+  introResearch:
+    'अनुसन्धानले पनि यस्ता सिकारुलाई आकारका साना भिन्नता र कान्जी बनाउने भागहरू चिन्न गाह्रो हुने देखाएको छ।',
+  introEven: 'जापानी भाषा पढ्न र बोल्न धेरै जाने पनि, यस्तो हुन सक्छ:',
+  introB1: '• उस्तै देखिने कान्जी झुक्याउनु',
+  introB2: '• कान्जीको केही भाग नदेख्नु',
+  introB3: '• कहाँ फरक छ भन्ने तुरुन्तै थाहा नपाउनु',
+  introB4: '• कान्जीलाई भागहरूमा छुट्याएर हेर्न गाह्रो हुनु',
+  introAfter: '',
+  introApp:
+    'यो एपमा कान्जी कण्ठ गर्नुअघि चाहिने "आकार हेर्ने क्षमता" — हेर्ने, छुट्याउने र चिन्ने — अभ्यास गर्नुहुन्छ।',
+  introGoal: 'यो कान्जी सजिलै सिक्नका लागि "कान्जी हेर्ने आधारभूत क्षमता" बलियो बनाउने अभ्यास हो।',
 }
 
 export const messages: Record<Language, Messages> = { en, ja, vi, ne }
