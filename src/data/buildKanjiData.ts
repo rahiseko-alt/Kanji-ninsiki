@@ -20,6 +20,7 @@ export type RawInputs = {
   fontChars: string[]
 }
 
+/** KanjiVG の部品の節。e は部品の字、p は位置（left/right/top/bottom など）、pt は分割された部品の番号 */
 export type ComponentNode = { e?: string; p?: string; pt?: string }
 
 /** Lv5 で見せる部品。row は左右（「亻 ＋ 寺」）、column は上下に並べる */
@@ -64,8 +65,11 @@ function partsOf(c: string, children: ComponentNode[], fontChars: Set<string>): 
   const usable = (e: string | undefined): e is string =>
     e !== undefined && [...e].length === 1 && e !== c && fontChars.has(e)
   if (!usable(a) || !usable(b)) return undefined
-  const layout = children[0].p === 'top' && children[1].p === 'bottom' ? 'column' : 'row'
-  return { parts: [a, b], layout }
+  // 左右か上下にきれいに分かれる字だけを出す（かまえ・たれ・にょう等は、並べ方で形を表せないため外す）
+  const [p, q] = children.map((k) => k.p)
+  if (p === 'left' && q === 'right') return { parts: [a, b], layout: 'row' }
+  if (p === 'top' && q === 'bottom') return { parts: [a, b], layout: 'column' }
+  return undefined
 }
 
 function buildOrder(raw: RawInputs, joyo: Set<string>): string[] {

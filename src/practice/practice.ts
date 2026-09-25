@@ -161,10 +161,15 @@ function pickTarget(
   if (review) return review
 
   const learning = data.order.slice(0, record.learningCount).filter(eligible)
-  const candidates = learning.filter((c) => !recent.includes(c))
-  if (candidates.length > 0) return weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
-  const beyond = data.order.slice(record.learningCount).find(eligible)
-  return beyond ?? learning[0] ?? data.order[0]
+  if (learning.length > 0) {
+    // 直前の字を避けきれないとき（出せる字が少ないとき）は、同じ字をもう一度出す
+    const fresh = learning.filter((c) => !recent.includes(c))
+    const candidates = fresh.length > 0 ? fresh : learning
+    return weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
+  }
+  const next = data.order.find(eligible)
+  if (next === undefined) throw new Error('出題できる字がありません')
+  return next
 }
 
 /** 正答率が低いほど重い。まだ出ていない字は最も重い */
@@ -241,7 +246,16 @@ export function answerBuild(
   ms: number,
 ): AnswerOutcome {
   const correct = picked === question.target
-  return applyAnswer(record, data, 'lv5', question.target, { correct, missed: false, picked: correct ? undefined : picked }, ms)
+  // 部品に分かれない字は Lv5 で出せないので、取り違えても再出題待ちには入れない（見本だけを入れる）
+  const reviewable = !correct && data.kanji[picked]?.parts !== undefined
+  return applyAnswer(
+    record,
+    data,
+    'lv5',
+    question.target,
+    { correct, missed: false, picked: correct ? undefined : picked, reviewPicked: reviewable },
+    ms,
+  )
 }
 
 export type BoardOutcome = AnswerOutcome & {
@@ -276,15 +290,18 @@ export function answerBoard(
   return { ...outcome, missed, wrongPicks }
 }
 
-/** 1問の答えの中身。picked は取り違えて選んだ字（無ければ undefined） */
-type Judgement = { correct: boolean; missed: boolean; picked: string | undefined }
+/**
+ * 1問の答えの中身。picked は取り違えて選んだ字（無ければ undefined）。
+ * reviewPicked が false なら、選んだ字は再出題待ちに入れない（既定は入れる）
+ */
+type Judgement = { correct: boolean; missed: boolean; picked: string | undefined; reviewPicked?: boolean }
 
 function applyAnswer(
   record: PracticeRecord,
   data: KanjiData,
   stage: Stage,
   target: string,
-  { correct, missed, picked }: Judgement,
+  { correct, missed, picked, reviewPicked = true }: Judgement,
   ms: number,
 ): AnswerOutcome {
   const prev = record.stats[target] ?? { seen: 0, correct: 0 }
@@ -307,7 +324,7 @@ function applyAnswer(
       },
     },
     recentTargets: [target, ...record.recentTargets].slice(0, RECENT_EXCLUDED),
-    pendingReview: nextPendingReview(record.pendingReview, target, picked, correct),
+    pendingReview: nextPendingReview(record.pendingReview, target, reviewPicked ? picked : undefined, correct),
   }
   if (nextProgress.currentSession.length < QUESTIONS_PER_SESSION) {
     return { record: withProgress(next, stage, nextProgress), correct }

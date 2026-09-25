@@ -90,3 +90,28 @@ describe('Lv5 の選択肢数と記録', () => {
     expect(restoreRecord(old).lv5).toEqual(initialRecord().lv5)
   })
 })
+
+describe('Lv5 の出題対象の絞り込み', () => {
+  it('学習中の出せる字が直前に出たばかりでも、学習中の字の外へは出ず同じ字を出す', () => {
+    const onlyThree: KanjiData = {
+      order: testData.order,
+      kanji: Object.fromEntries(
+        testData.order.map((c, i) => [
+          c,
+          c === '三' || i >= 8 ? testData.kanji[c] : { ...testData.kanji[c], parts: undefined },
+        ]),
+      ),
+    }
+    const { questions } = playBuild(initialRecord(), 3, () => true, 1, onlyThree)
+    expect(questions.map((q) => q.target)).toEqual(['三', '三', '三'])
+  })
+
+  it('部品に分かれない字を取り違えて選んでも、再出題待ちには入れない（Lv5 では出せないため）', () => {
+    const q = nextBuildQuestion(initialRecord(), testData, seededRng(1))
+    const withNoParts = { ...q, choices: [...q.choices.slice(0, 3), '一'] }
+    const r = answerBuild(initialRecord(), testData, withNoParts, '一', 900)
+    expect(r.record.pendingReview).not.toContain('一')
+    expect(r.record.pendingReview).toContain(q.target)
+    expect(r.record.stats[q.target]).toMatchObject({ mixedUp: 1, missed: 0 })
+  })
+})

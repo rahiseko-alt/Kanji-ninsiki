@@ -37,7 +37,7 @@ const CORRECT_PAUSE_MS = 500
 
 type AnyQuestion = Question | FlashQuestion | BuildQuestion
 
-/** Lv1 と Lv3 で、問題の作り方と答え方だけを切り替える */
+/** Lv1・Lv3・Lv5 で、問題の作り方と答え方だけを切り替える */
 const modes = {
   lv1: {
     next: (r: PracticeRecord, d: KanjiData, rng: Rng): AnyQuestion => nextQuestion(r, d, rng),

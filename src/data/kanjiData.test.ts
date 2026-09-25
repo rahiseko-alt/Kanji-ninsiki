@@ -68,11 +68,15 @@ describe('Lv5 の部品', () => {
     }
   })
 
-  it('1500字以上が組み立ての問題に使える', () => {
-    expect(data.order.filter((c) => data.kanji[c].parts).length).toBeGreaterThan(1500)
+  it('1300字以上が組み立ての問題に使える', () => {
+    expect(data.order.filter((c) => data.kanji[c].parts).length).toBeGreaterThan(1300)
   })
 
   it('2つの部品に分かれない字は部品を持たない', () => {
     expect(data.kanji['一'].parts).toBeUndefined()
+  })
+
+  it('左右・上下以外の分かれ方（かまえ・にょう等）や位置の無い字は出さない', () => {
+    for (const c of ['間', '通', '出']) expect(data.kanji[c].parts, c).toBeUndefined()
   })
 })
