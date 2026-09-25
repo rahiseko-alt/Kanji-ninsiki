@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { progressOf, type PracticeRecord, type SessionResult, type Stage } from '../practice/practice.ts'
 import { StageSwitch } from './StageSwitch.tsx'
+import { StartChoice } from './StartChoice.tsx'
 import { useMessages } from '../i18n.tsx'
 import { kanjiData } from '../kanjiData.ts'
 import { formatSeconds } from '../format.ts'
 
-type Props = { record: PracticeRecord; initialStage: Stage; onReset: () => void }
+type Props = { record: PracticeRecord; initialStage: Stage; onStart: (startAt: number) => void; onReset: () => void }
 
-export function RecordsScreen({ record, initialStage, onReset }: Props) {
+export function RecordsScreen({ record, initialStage, onStart, onReset }: Props) {
   const m = useMessages()
   const [stage, setStage] = useState<Stage>(initialStage)
   const sessions = progressOf(record, stage).sessions
@@ -15,7 +16,7 @@ export function RecordsScreen({ record, initialStage, onReset }: Props) {
     <main className="records">
       <h1>{m.recordsTitle}</h1>
       <p>
-        {m.learningCount}: <strong>{Math.min(record.learningCount, kanjiData.order.length)}</strong>
+        {m.learningCount}: <strong>{Math.min(record.learningCount, kanjiData.order.length) - record.startAt}</strong>
       </p>
       <StageSwitch stage={stage} onChange={setStage} />
       {sessions.length === 0 ? (
@@ -62,6 +63,7 @@ export function RecordsScreen({ record, initialStage, onReset }: Props) {
           </table>
         </>
       )}
+      <StartChoice startAt={record.startAt} onChange={onStart} />
       <button
         className="danger"
         onClick={() => {

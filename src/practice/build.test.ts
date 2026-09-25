@@ -15,7 +15,7 @@ function playBuild(record: PracticeRecord, n: number, isCorrect: (i: number) => 
   const questions = []
   const outcomes = []
   for (let i = 0; i < n; i++) {
-    const q = nextBuildQuestion(record, data, rng)
+    const q = nextBuildQuestion(record, data, rng)!
     questions.push(q)
     const picked = isCorrect(i) ? q.target : q.choices.find((c) => c !== q.target)!
     const r = answerBuild(record, data, q, picked, 1200 + i)
@@ -25,26 +25,32 @@ function playBuild(record: PracticeRecord, n: number, isCorrect: (i: number) => 
   return { record, questions, outcomes }
 }
 
-const countAfter = (r: PracticeRecord) => nextBuildQuestion(r, testData, seededRng(1)).choices.length
+const countAfter = (r: PracticeRecord) => nextBuildQuestion(r, testData, seededRng(1))!.choices.length
 
 describe('Lv5 の問題', () => {
   it('部品2つと並べ方、正解1つを含む4字の選択肢を出す', () => {
-    const q = nextBuildQuestion(initialRecord(), testData, seededRng(3))
+    const q = nextBuildQuestion(initialRecord(), testData, seededRng(3))!
     expect(q.parts).toEqual(testData.kanji[q.target].parts)
     expect(q.choices).toHaveLength(4)
     expect(q.choices.filter((c) => c === q.target)).toHaveLength(1)
   })
 
-  it('部品に分かれない字は出さず、学習中の字から出す', () => {
+  it('部品に分かれない字は出さない', () => {
     const { questions } = playBuild(initialRecord(), 30, () => true, 2)
-    const learning = new Set(testData.order.slice(0, 8))
-    for (const q of questions.slice(0, 10)) {
-      expect(['一', '二']).not.toContain(q.target)
-      expect(learning.has(q.target)).toBe(true)
-    }
+    for (const q of questions) expect(['一', '二']).not.toContain(q.target)
   })
 
-  it('学習中の字に部品に分かれる字が無ければ、出題順で次の分かれる字を出す', () => {
+  it('学習中の字に分かれる字が8字に満たなければ、出題順で次の分かれる字を足して8字から出す', () => {
+    // testData の先頭8字で分かれるのは 三〜八 の6字。九・十 を足した8字から出す
+    const { questions } = playBuild(initialRecord(), 60, () => true, 3)
+    const pool = new Set(['三', '四', '五', '六', '七', '八', '九', '十'])
+    for (const q of questions.slice(0, 10)) expect(pool.has(q.target), q.target).toBe(true)
+    expect(new Set(questions.slice(0, 10).map((q) => q.target)).size).toBeGreaterThan(3)
+    const early = questions.slice(0, 10).map((q) => q.target)
+    expect(early.includes('九') || early.includes('十')).toBe(true)
+  })
+
+  it('学習中の字に部品に分かれる字が無ければ、出題順で次の分かれる字から出す', () => {
     const noParts: KanjiData = {
       order: testData.order,
       kanji: Object.fromEntries(
@@ -52,7 +58,7 @@ describe('Lv5 の問題', () => {
       ),
     }
     const { questions } = playBuild(initialRecord(), 3, () => true, 1, noParts)
-    expect(questions[0].target).toBe(testData.order[9])
+    for (const q of questions) expect(testData.order.slice(9)).toContain(q.target)
   })
 })
 
@@ -92,7 +98,7 @@ describe('Lv5 の選択肢数と記録', () => {
 })
 
 describe('Lv5 の出題対象の絞り込み', () => {
-  it('学習中の出せる字が直前に出たばかりでも、学習中の字の外へは出ず同じ字を出す', () => {
+  it('学習中の出せる字が1字だけでも、同じ字ばかり続かない', () => {
     const onlyThree: KanjiData = {
       order: testData.order,
       kanji: Object.fromEntries(
@@ -102,12 +108,13 @@ describe('Lv5 の出題対象の絞り込み', () => {
         ]),
       ),
     }
-    const { questions } = playBuild(initialRecord(), 3, () => true, 1, onlyThree)
-    expect(questions.map((q) => q.target)).toEqual(['三', '三', '三'])
+    const { questions } = playBuild(initialRecord(), 10, () => true, 1, onlyThree)
+    const targets = questions.map((q) => q.target)
+    for (let i = 1; i < targets.length; i++) expect(targets[i]).not.toBe(targets[i - 1])
   })
 
   it('部品に分かれない字を取り違えて選んでも、再出題待ちには入れない（Lv5 では出せないため）', () => {
-    const q = nextBuildQuestion(initialRecord(), testData, seededRng(1))
+    const q = nextBuildQuestion(initialRecord(), testData, seededRng(1))!
     const withNoParts = { ...q, choices: [...q.choices.slice(0, 3), '一'] }
     const r = answerBuild(initialRecord(), testData, withNoParts, '一', 900)
     expect(r.record.pendingReview).not.toContain('一')

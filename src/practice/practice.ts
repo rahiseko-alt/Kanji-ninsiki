@@ -25,6 +25,10 @@ const STREAK_TO_RAISE = 5
 /** 練習回でこの数以上正解すると学習中の字が増える（10問中9問 = 8割超） */
 const CORRECT_TO_GROW = 9
 const GROW_BY = 2
+/** 始める位置（出題順の何字目から学習中の字を始めるか） */
+export const START_POSITIONS = { beginner: 0, some: 200, well: 600 } as const
+/** くみたてる で、学習中の字に出せる字が足りないときに足してよい、学習中の字の先の字数 */
+const LOOKAHEAD = 20
 
 export type KanjiStats = {
   seen: number
@@ -53,7 +57,8 @@ export type StageProgress = {
 
 /** Lv1 の進み具合は以前の記録と同じ形で直下に持ち、Lv2〜Lv4 は lv2〜lv4 に持つ */
 export type PracticeRecord = StageProgress & {
-  /** 学習中の字は出題順の先頭からこの数（段階で共通） */
+  /** 学習中の字は出題順の startAt 字目から learningCount 字目の手前まで（段階で共通） */
+  startAt: number
   learningCount: number
   lv2: StageProgress
   lv3: StageProgress
@@ -68,6 +73,7 @@ export type PracticeRecord = StageProgress & {
 
 export function initialRecord(): PracticeRecord {
   return {
+    startAt: 0,
     learningCount: FIRST_LEARNING_COUNT,
     choiceCount: CHOICE_COUNTS[0],
     streak: 0,
@@ -111,18 +117,23 @@ function withProgress(record: PracticeRecord, stage: Stage, progress: StageProgr
 }
 
 export function nextQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): Question {
-  return createQuestion(data, pickTarget(record, data, rng), record.choiceCount, rng)
+  return createQuestion(data, pickAny(record, data, rng), record.choiceCount, rng)
 }
 
 export function nextBoardQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): BoardQuestion {
-  return createBoard(data, pickTarget(record, data, rng), record.lv2.choiceCount, rng)
+  return createBoard(data, pickAny(record, data, rng), record.lv2.choiceCount, rng)
+}
+
+/** どの字でも出せる段階（Lv1〜Lv4）の見本。学習中の字は必ずあるので null にならない */
+function pickAny(record: PracticeRecord, data: KanjiData, rng: Rng): string {
+  return pickTarget(record, data, rng) ?? data.order[record.startAt]
 }
 
 /** Lv3 の問題。見本を showMs だけ見せてから選択肢を出す */
 export type FlashQuestion = Question & { showMs: number }
 
 export function nextFlashQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): FlashQuestion {
-  const question = createQuestion(data, pickTarget(record, data, rng), FLASH_CHOICE_COUNT, rng)
+  const question = createQuestion(data, pickAny(record, data, rng), FLASH_CHOICE_COUNT, rng)
   return { ...question, showMs: showMsOf(record) }
 }
 
@@ -132,44 +143,62 @@ export function showMsOf(record: PracticeRecord): number {
 }
 
 export function nextOddQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): OddQuestion {
-  return createOddBoard(data, pickTarget(record, data, rng), record.lv4.choiceCount, rng)
+  return createOddBoard(data, pickAny(record, data, rng), record.lv4.choiceCount, rng)
 }
 
 /** Lv5 の問題。部品2つ（parts）から組み立てた字を選択肢から選ぶ */
 export type BuildQuestion = Question & { parts: Parts }
 
-export function nextBuildQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): BuildQuestion {
+/** 学習中の字とその先20字に組み立てられる字が1つも無いときは null（画面で案内を出す） */
+export function nextBuildQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): BuildQuestion | null {
   const hasParts = (c: string) => data.kanji[c]?.parts !== undefined
   const target = pickTarget(record, data, rng, hasParts)
+  if (target === null) return null
   const question = createQuestion(data, target, record.lv5.choiceCount, rng)
   return { ...question, parts: data.kanji[target].parts! }
 }
 
 /**
- * 再出題待ちを優先し、無ければ学習中の字から正答率の低い字ほど選ばれやすく選ぶ。
- * eligible で出せる字を絞る（Lv5 は部品に分かれる字だけ）。学習中の字に出せる字が無ければ、
- * 出題順で学習中の字の次にある、出せる字を出す
+ * 再出題待ちを優先し、無ければ出題する字の集まりから正答率の低い字ほど選ばれやすく選ぶ。
+ * 集まりはふつう学習中の字。eligible で出せる字を絞る段階（Lv5 は部品に分かれる字だけ）では、
+ * 学習中の字のうち出せる字が8字に満たなければ、学習中の字の先20字の中から出せる字を足して8字まで
+ * そろえる（同じ字ばかり出ないように、かつ練習中の字から離れすぎないように）。
+ * 出せる字が1つも無ければ null
  */
 function pickTarget(
   record: PracticeRecord,
   data: KanjiData,
   rng: Rng,
   eligible: (c: string) => boolean = () => true,
-): string {
+): string | null {
   const recent = record.recentTargets.slice(0, RECENT_EXCLUDED)
   const review = record.pendingReview.find((c) => !recent.includes(c) && c in data.kanji && eligible(c))
   if (review) return review
 
-  const learning = data.order.slice(0, record.learningCount).filter(eligible)
-  if (learning.length > 0) {
-    // 直前の字を避けきれないとき（出せる字が少ないとき）は、同じ字をもう一度出す
-    const fresh = learning.filter((c) => !recent.includes(c))
-    const candidates = fresh.length > 0 ? fresh : learning
-    return weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
-  }
-  const next = data.order.find(eligible)
-  if (next === undefined) throw new Error('出題できる字がありません')
-  return next
+  const pool = poolOf(record, data, eligible)
+  if (pool.length === 0) return null
+  // 直前の字を避けきれないとき（出せる字が少ないとき）は、同じ字をもう一度出す
+  const fresh = pool.filter((c) => !recent.includes(c))
+  const candidates = fresh.length > 0 ? fresh : pool
+  return weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
+}
+
+/** 学習中の字（出題順の startAt 字目から learningCount 字目の手前まで） */
+function learningOf(record: PracticeRecord, data: KanjiData): string[] {
+  return data.order.slice(record.startAt, record.learningCount)
+}
+
+function poolOf(record: PracticeRecord, data: KanjiData, eligible: (c: string) => boolean): string[] {
+  const learning = learningOf(record, data).filter(eligible)
+  if (learning.length >= FIRST_LEARNING_COUNT) return learning
+  const ahead = data.order.slice(record.learningCount, record.learningCount + LOOKAHEAD).filter(eligible)
+  return [...learning, ...ahead].slice(0, FIRST_LEARNING_COUNT)
+}
+
+/** 始める位置を変える。学習中の字だけを新しい位置の8字から始め直し、記録は残す */
+export function withStart(record: PracticeRecord, data: KanjiData, startAt: number): PracticeRecord {
+  const clamped = Math.max(0, Math.min(startAt, data.order.length - FIRST_LEARNING_COUNT))
+  return { ...record, startAt: clamped, learningCount: clamped + FIRST_LEARNING_COUNT }
 }
 
 /** 正答率が低いほど重い。まだ出ていない字は最も重い */
@@ -381,6 +410,8 @@ export function restoreRecord(saved: unknown): PracticeRecord {
   if (!isRecord(saved)) return initialRecord()
   const r = saved as PracticeRecord
   return {
+    // 始める位置を持たない以前の記録は先頭から
+    startAt: r.startAt ?? 0,
     learningCount: r.learningCount,
     choiceCount: r.choiceCount,
     streak: r.streak,
@@ -431,6 +462,8 @@ function isRecord(v: unknown): boolean {
   return (
     isCount(v.learningCount) &&
     (v.learningCount as number) >= FIRST_LEARNING_COUNT &&
+    (v.startAt === undefined ||
+      (isCount(v.startAt) && (v.learningCount as number) >= (v.startAt as number) + FIRST_LEARNING_COUNT)) &&
     isStage(v, CHOICE_COUNTS) &&
     (v.lv2 === undefined || isStage(v.lv2, BOARD_SIZES)) &&
     (v.lv3 === undefined || isStage(v.lv3, SHOW_TIMES)) &&

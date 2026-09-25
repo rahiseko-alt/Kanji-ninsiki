@@ -6,10 +6,12 @@ import { PracticeScreen } from './screens/PracticeScreen.tsx'
 import { BoardScreen } from './screens/BoardScreen.tsx'
 import { OddScreen } from './screens/OddScreen.tsx'
 import { StageSwitch } from './screens/StageSwitch.tsx'
+import { StartChoice } from './screens/StartChoice.tsx'
+import { kanjiData } from './kanjiData.ts'
 import { ResultScreen } from './screens/ResultScreen.tsx'
 import { RecordsScreen } from './screens/RecordsScreen.tsx'
 import { CreditsScreen } from './screens/CreditsScreen.tsx'
-import { initialRecord, type PracticeRecord, type SessionResult, type Stage } from './practice/practice.ts'
+import { initialRecord, withStart, type PracticeRecord, type SessionResult, type Stage } from './practice/practice.ts'
 
 type Screen = 'practice' | 'records' | 'credits'
 
@@ -74,6 +76,11 @@ export function App() {
           <RecordsScreen
             record={record}
             initialStage={settings.stage}
+            onStart={(startAt) => {
+              if (startAt !== record.startAt && window.confirm(m.confirmStart)) {
+                updateRecord(withStart(record, kanjiData, startAt))
+              }
+            }}
             onReset={() => {
               updateRecord(initialRecord())
               clearResult()
@@ -85,6 +92,7 @@ export function App() {
           <main className="page intro">
             <h1>{m.introTitle}</h1>
             <p>{m.introBody}</p>
+            <StartChoice startAt={record.startAt} onChange={(startAt) => updateRecord(withStart(record, kanjiData, startAt))} />
             <button className="next" onClick={() => updateSettings({ ...settings, seenIntro: true })} autoFocus>
               {m.introOk}
             </button>

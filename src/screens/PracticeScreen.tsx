@@ -49,17 +49,31 @@ const modes = {
       answerFlash(r, d, q, c, ms),
   },
   lv5: {
-    next: (r: PracticeRecord, d: KanjiData, rng: Rng): AnyQuestion => nextBuildQuestion(r, d, rng),
+    next: (r: PracticeRecord, d: KanjiData, rng: Rng): AnyQuestion | null => nextBuildQuestion(r, d, rng),
     answer: (r: PracticeRecord, d: KanjiData, q: AnyQuestion, c: string, ms: number) =>
       answerBuild(r, d, q, c, ms),
   },
 }
 
-export function PracticeScreen({ stage, record, onRecord, onSessionResult, onShowResult }: Props) {
+export function PracticeScreen(props: Props) {
+  const m = useMessages()
+  // くみたてる では、学習中の字の近くに組み立てられる字が無いと問題を出せない
+  const [first] = useState(() => modes[props.stage].next(props.record, kanjiData, Math.random))
+  if (first === null) {
+    return (
+      <main className="practice">
+        <p className="empty">{m.buildEmpty}</p>
+      </main>
+    )
+  }
+  return <PracticeRound {...props} first={first} />
+}
+
+function PracticeRound({ stage, record, onRecord, onSessionResult, onShowResult, first }: Props & { first: AnyQuestion }) {
   const m = useMessages()
   const quickLook = stage === 'lv3'
   const mode = modes[stage]
-  const [question, setQuestion] = useState<AnyQuestion>(() => mode.next(record, kanjiData, Math.random))
+  const [question, setQuestion] = useState<AnyQuestion>(first)
   // Lv3 で見本を見せている間は true（選択肢を隠す）
   const [showing, setShowing] = useState(quickLook)
   const [picked, setPicked] = useState<string | null>(null)
@@ -80,7 +94,7 @@ export function PracticeScreen({ stage, record, onRecord, onSessionResult, onSho
       onShowResult()
       return
     }
-    setQuestion(mode.next(latest, kanjiData, Math.random))
+    setQuestion((prev) => mode.next(latest, kanjiData, Math.random) ?? prev)
     setPicked(null)
     setShowing(quickLook)
     shownAt.current = performance.now()
