@@ -1,4 +1,16 @@
 @font-face {
+  font-family: 'Noto Serif JP';
+  src: url('./assets/fonts/NotoSerifJP-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Noto Serif JP';
+  src: url('./assets/fonts/NotoSerifJP-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
   font-family: 'Noto Sans JP';
   src: url('./assets/fonts/NotoSansJP-subset.woff2') format('woff2');
   font-weight: 400;
@@ -29,8 +41,9 @@
   }
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--fg); font-family: 'Noto Sans JP', system-ui, sans-serif; }
-[lang='ja'] { font-family: 'Noto Sans JP', sans-serif; }
+/* 画面の文言は明朝体（デザインどおり）。問題に出す漢字はゴシック体のまま（見分けやすさの決定） */
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: 'Noto Serif JP', 'Noto Sans JP', serif; }
+.target, .choice, .cell, .compare-char { font-family: 'Noto Sans JP', sans-serif; }
 button { font-family: inherit; }
 .practice { max-width: 560px; margin: 0 auto; padding: 24px 16px; text-align: center; }
 .target {

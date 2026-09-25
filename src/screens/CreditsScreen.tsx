@@ -39,6 +39,12 @@ const credits: Credit[] = [
     license: 'SIL Open Font License 1.1',
     note: 'Subset to the characters used in this app (modified version).',
   },
+  {
+    name: 'Noto Serif JP © Google Inc.',
+    url: 'https://github.com/google/fonts/tree/main/ofl/notoserifjp',
+    license: 'SIL Open Font License 1.1',
+    note: 'Used for screen text. Subset to the characters used in this app (modified version).',
+  },
 ]
 
 export function CreditsScreen() {
