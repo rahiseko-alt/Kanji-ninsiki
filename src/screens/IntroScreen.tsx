@@ -12,6 +12,10 @@ import goal from '../assets/intro/goal.webp'
 /** 文章が下から上へ流れる速さ（1秒あたりの px） */
 const ROLL_SPEED = 36
 
+/** 慣れない文字の例（デーヴァナーガリー）と、よく似た漢字の組。どの言語でも同じものを見せる */
+const DEVANAGARI = ['क ख ग घ च छ']
+const SIMILAR_KANJI = ['未 末', '日 目', '土 士']
+
 type Props = {
   /** 一度でも最後まで見ていれば、途中で「とばす」を出す */
   canSkip: boolean
@@ -26,8 +30,11 @@ export function IntroScreen({ canSkip, onDone }: Props) {
   // 動きを減らす設定の端末では流さず、最初から全文を見せる
   const [ended, setEnded] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
 
-  const blocks: { text: string; img?: string; bullet?: boolean }[] = [
+  const blocks: { text: string; img?: string; glyphs?: string[]; bullet?: boolean }[] = [
     { text: m.introLead },
+    { text: m.introUsed },
+    { text: m.introExample, glyphs: DEVANAGARI },
+    { text: m.introSame, glyphs: SIMILAR_KANJI },
     { text: m.introWorld, img: world },
     { text: m.introResearch, img: compare },
     { text: m.introEven, img: confident },
@@ -63,6 +70,13 @@ export function IntroScreen({ canSkip, onDone }: Props) {
               <section key={b.text} className={`intro-block ${b.bullet ? 'is-bullet' : ''}`}>
                 {b.img && <img src={b.img} alt="" loading="lazy" />}
                 <p>{b.text}</p>
+                {b.glyphs && (
+                  <div className="intro-glyphs" aria-hidden="true">
+                    {b.glyphs.map((g) => (
+                      <span key={g}>{g}</span>
+                    ))}
+                  </div>
+                )}
               </section>
             ))}
         </div>

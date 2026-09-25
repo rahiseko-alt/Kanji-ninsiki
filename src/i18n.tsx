@@ -80,16 +80,22 @@ const en = {
   stageDescOddOneOut: 'Find the one that is different',
   stageDescBuild: 'Put two parts together',
   introLead: 'This app is not for memorizing kanji.',
+  introUsed: 'Telling letters apart takes getting used to.',
+  introExample:
+    'For example, Japanese people who are not used to the Devanagari script may at first find it hard to quickly tell these apart:',
+  introSame:
+    'In the same way, people who grew up without kanji in daily life may find it hard to see small differences like these right away:',
   introWorld: 'Most people in the world grew up with a writing system that does not use kanji in daily life.',
   introResearch:
-    'Research reports that learners from such backgrounds find it hard to notice small differences in kanji shapes and to recognize the parts that make up a kanji.',
+    'Research also reports that such learners find it hard to notice fine differences in shape and to recognize the parts that make up a kanji.',
   introEven: 'Even as you learn to read and speak more Japanese, you may still:',
   introB1: '• mix up kanji that look alike',
   introB2: '• miss part of a kanji',
   introB3: '• not see right away where two kanji differ',
   introB4: '• find it hard to see a kanji as a set of parts',
   introAfter: '',
-  introApp: 'In this app, you practice looking at kanji, breaking them into parts, and telling them apart.',
+  introApp:
+    'In this app, you practice the "shape-seeing skill" you need before memorizing kanji: looking at kanji, breaking them into parts, and telling them apart.',
   introGoal: 'It is training that builds the basic "kanji-seeing strength" that makes kanji easier to learn.',
 }
 
@@ -160,16 +166,22 @@ const ja: Messages = {
   stageDescOddOneOut: 'ちがう じを 1つ えらぶ',
   stageDescBuild: '2つの ぶひんを あわせる',
   introLead: 'この アプリは、かんじを おぼえる ための アプリでは ありません。',
+  introUsed: 'もじを みわけるには、なれが ひつようです。',
+  introExample:
+    'たとえば、デーヴァナーガリーもじに なれていない にほんじんは、つぎの もじを みても、さいしょは パッと くべつするのが むずかしいかも しれません。',
+  introSame:
+    'おなじように、かんじを ふだん つかわない もじの なかで そだった ひとには、つぎのような かんじの ちいさな ちがいを、すぐに みわけるのが むずかしい ことが あります。',
   introWorld: 'せかいでは、かんじを ふだん つかわない もじの なかで そだった ひとの ほうが おおいです。',
   introResearch:
-    'けんきゅうでは、そのような がくしゅうしゃは、かんじの こまかい かたちの ちがいや、かんじを つくる ぶひんを みわけるのが むずかしい ことが ほうこくされています。',
+    'けんきゅうでも、こまかい かたちの ちがいや、かんじを つくる ぶひんを みわけるのが むずかしい ことが ほうこくされています。',
   introEven: 'よめる ことばや はなせる にほんごが ふえても、',
   introB1: '・にている かんじを まちがえる',
   introB2: '・かんじの いちぶを みおとす',
   introB3: '・どこが ちがうのか、すぐに わからない',
   introB4: '・かんじを ぶひんに わけて みるのが むずかしい',
   introAfter: 'と いった ことが あります。',
-  introApp: 'この アプリでは、かんじを「みる」「わける」「みわける」 れんしゅうを します。',
+  introApp:
+    'この アプリでは、かんじを おぼえる まえに ひつような「かたちを みる ちから」を、「みる」「わける」「みわける」 れんしゅうで きたえます。',
   introGoal: 'かんじを もっと まなびやすく する ための「かんじを みる きそたいりょく」を きたえる トレーニングです。',
 }
 
@@ -238,16 +250,22 @@ const vi: Messages = {
   stageDescOddOneOut: 'Tìm chữ khác',
   stageDescBuild: 'Ghép hai bộ phận',
   introLead: 'Ứng dụng này không phải để ghi nhớ chữ Hán.',
+  introUsed: 'Để phân biệt chữ viết, cần phải quen mắt.',
+  introExample:
+    'Ví dụ, người Nhật chưa quen chữ Devanagari có thể lúc đầu khó phân biệt nhanh những chữ này:',
+  introSame:
+    'Tương tự, người lớn lên trong môi trường không dùng chữ Hán hằng ngày có thể khó nhận ra ngay những khác biệt nhỏ như thế này:',
   introWorld: 'Trên thế giới, phần lớn mọi người lớn lên trong môi trường chữ viết không dùng chữ Hán hằng ngày.',
   introResearch:
-    'Các nghiên cứu cho thấy người học như vậy thường khó nhận ra những khác biệt nhỏ về hình dạng chữ Hán và các bộ phận tạo nên chữ Hán.',
+    'Các nghiên cứu cũng cho thấy người học như vậy khó nhận ra khác biệt nhỏ về hình dạng và các bộ phận tạo nên chữ Hán.',
   introEven: 'Dù đã đọc và nói được nhiều tiếng Nhật hơn, bạn vẫn có thể:',
   introB1: '• nhầm những chữ Hán trông giống nhau',
   introB2: '• bỏ sót một phần của chữ',
   introB3: '• không nhận ra ngay hai chữ khác nhau ở đâu',
   introB4: '• khó nhìn một chữ Hán thành các bộ phận',
   introAfter: '',
-  introApp: 'Trong ứng dụng này, bạn luyện "nhìn", "tách" và "phân biệt" chữ Hán.',
+  introApp:
+    'Trong ứng dụng này, bạn luyện "khả năng nhìn hình dạng" cần có trước khi ghi nhớ chữ Hán: nhìn, tách và phân biệt chữ Hán.',
   introGoal: 'Đây là bài luyện giúp tăng "sức nền để nhìn chữ Hán", để việc học chữ Hán trở nên dễ hơn.',
 }
 
@@ -316,16 +334,22 @@ const ne: Messages = {
   stageDescOddOneOut: 'फरक कान्जी खोज्नुहोस्',
   stageDescBuild: 'दुई भाग जोड्नुहोस्',
   introLead: 'यो एप कान्जी कण्ठ गर्नका लागि होइन।',
+  introUsed: 'अक्षर छुट्याउन बानी पर्नु आवश्यक छ।',
+  introExample:
+    'उदाहरणका लागि, देवनागरी लिपिमा बानी नपरेका जापानीलाई सुरुमा यी अक्षर तुरुन्तै छुट्याउन गाह्रो हुन सक्छ:',
+  introSame:
+    'त्यसै गरी, दैनिक जीवनमा कान्जी प्रयोग नहुने वातावरणमा हुर्केकालाई यस्ता कान्जीका साना भिन्नता तुरुन्तै देख्न गाह्रो हुन सक्छ:',
   introWorld: 'संसारमा धेरैजसो मानिस दैनिक जीवनमा कान्जी प्रयोग नहुने लिपिको वातावरणमा हुर्केका छन्।',
   introResearch:
-    'अनुसन्धानअनुसार, यस्ता सिकारुलाई कान्जीको आकारका साना भिन्नता र कान्जी बनाउने भागहरू चिन्न गाह्रो हुन्छ।',
+    'अनुसन्धानले पनि यस्ता सिकारुलाई आकारका साना भिन्नता र कान्जी बनाउने भागहरू चिन्न गाह्रो हुने देखाएको छ।',
   introEven: 'जापानी भाषा पढ्न र बोल्न धेरै जाने पनि, यस्तो हुन सक्छ:',
   introB1: '• उस्तै देखिने कान्जी झुक्याउनु',
   introB2: '• कान्जीको केही भाग नदेख्नु',
   introB3: '• कहाँ फरक छ भन्ने तुरुन्तै थाहा नपाउनु',
   introB4: '• कान्जीलाई भागहरूमा छुट्याएर हेर्न गाह्रो हुनु',
   introAfter: '',
-  introApp: 'यो एपमा तपाईं कान्जी "हेर्ने", "छुट्याउने" र "चिन्ने" अभ्यास गर्नुहुन्छ।',
+  introApp:
+    'यो एपमा कान्जी कण्ठ गर्नुअघि चाहिने "आकार हेर्ने क्षमता" — हेर्ने, छुट्याउने र चिन्ने — अभ्यास गर्नुहुन्छ।',
   introGoal: 'यो कान्जी सजिलै सिक्नका लागि "कान्जी हेर्ने आधारभूत क्षमता" बलियो बनाउने अभ्यास हो।',
 }
 

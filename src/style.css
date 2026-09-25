@@ -279,6 +279,8 @@ a { color: var(--accent); }
 .intro-block p { margin: 0; font-size: clamp(18px, 5vw, 22px); line-height: 1.9; letter-spacing: 0.04em; word-break: keep-all; overflow-wrap: anywhere; }
 .intro-block img { display: block; width: min(46vw, 180px); height: auto; margin: 0 auto 10px; }
 .intro-block.is-bullet { margin-bottom: 36px; }
+.intro-glyphs { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 14px; }
+.intro-glyphs span { font-size: clamp(34px, 10vw, 44px); letter-spacing: 0.3em; line-height: 1.4; }
 .intro-block.is-bullet p { font-weight: 700; }
 .intro-block.is-bullet img { width: min(36vw, 140px); }
 .intro-skip {
