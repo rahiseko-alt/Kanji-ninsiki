@@ -1,5 +1,5 @@
-// 練習の進め方（仕様書 rahiseko-alt/Kanji-ninsiki#2 モジュール2、Lv2 は #11、Lv3 は #15、Lv4 は #19）。画面・保存・時計には触れない
-import type { KanjiData } from '../data/buildKanjiData.ts'
+// 練習の進め方（仕様書 rahiseko-alt/Kanji-ninsiki#2 モジュール2、Lv2 は #11、Lv3 は #15、Lv4 は #19、Lv5 は #22）。画面・保存・時計には触れない
+import type { KanjiData, Parts } from '../data/buildKanjiData.ts'
 import {
   createBoard,
   createOddBoard,
@@ -58,6 +58,7 @@ export type PracticeRecord = StageProgress & {
   lv2: StageProgress
   lv3: StageProgress
   lv4: StageProgress
+  lv5: StageProgress
   stats: Record<string, KanjiStats>
   /** 直近の見本（新しい順） */
   recentTargets: string[]
@@ -78,6 +79,7 @@ export function initialRecord(): PracticeRecord {
     lv2: initialStage(BOARD_SIZES[0]),
     lv3: initialStage(SHOW_TIMES[0]),
     lv4: initialStage(BOARD_SIZES[0]),
+    lv5: initialStage(CHOICE_COUNTS[0]),
   }
 }
 
@@ -85,9 +87,18 @@ function initialStage(choiceCount: number): StageProgress {
   return { choiceCount, streak: 0, currentSession: [], sessions: [] }
 }
 
-/** 段階。Lv1「1つ さがす」、Lv2「ぜんぶ さがす」、Lv3「いっしゅん みる」、Lv4「ちがう じを さがす」 */
-export type Stage = 'lv1' | 'lv2' | 'lv3' | 'lv4'
-const COUNTS_OF: Record<Stage, number[]> = { lv1: CHOICE_COUNTS, lv2: BOARD_SIZES, lv3: SHOW_TIMES, lv4: BOARD_SIZES }
+/**
+ * 段階。Lv1「1つ さがす」、Lv2「ぜんぶ さがす」、Lv3「いっしゅん みる」、
+ * Lv4「ちがう じを さがす」、Lv5「くみたてる」
+ */
+export type Stage = 'lv1' | 'lv2' | 'lv3' | 'lv4' | 'lv5'
+const COUNTS_OF: Record<Stage, number[]> = {
+  lv1: CHOICE_COUNTS,
+  lv2: BOARD_SIZES,
+  lv3: SHOW_TIMES,
+  lv4: BOARD_SIZES,
+  lv5: CHOICE_COUNTS,
+}
 
 export function progressOf(record: PracticeRecord, stage: Stage): StageProgress {
   if (stage !== 'lv1') return record[stage]
@@ -124,15 +135,36 @@ export function nextOddQuestion(record: PracticeRecord, data: KanjiData, rng: Rn
   return createOddBoard(data, pickTarget(record, data, rng), record.lv4.choiceCount, rng)
 }
 
-/** 再出題待ちを優先し、無ければ学習中の字から正答率の低い字ほど選ばれやすく選ぶ */
-function pickTarget(record: PracticeRecord, data: KanjiData, rng: Rng): string {
+/** Lv5 の問題。部品2つ（parts）から組み立てた字を選択肢から選ぶ */
+export type BuildQuestion = Question & { parts: Parts }
+
+export function nextBuildQuestion(record: PracticeRecord, data: KanjiData, rng: Rng): BuildQuestion {
+  const hasParts = (c: string) => data.kanji[c]?.parts !== undefined
+  const target = pickTarget(record, data, rng, hasParts)
+  const question = createQuestion(data, target, record.lv5.choiceCount, rng)
+  return { ...question, parts: data.kanji[target].parts! }
+}
+
+/**
+ * 再出題待ちを優先し、無ければ学習中の字から正答率の低い字ほど選ばれやすく選ぶ。
+ * eligible で出せる字を絞る（Lv5 は部品に分かれる字だけ）。学習中の字に出せる字が無ければ、
+ * 出題順で学習中の字の次にある、出せる字を出す
+ */
+function pickTarget(
+  record: PracticeRecord,
+  data: KanjiData,
+  rng: Rng,
+  eligible: (c: string) => boolean = () => true,
+): string {
   const recent = record.recentTargets.slice(0, RECENT_EXCLUDED)
-  const review = record.pendingReview.find((c) => !recent.includes(c) && c in data.kanji)
+  const review = record.pendingReview.find((c) => !recent.includes(c) && c in data.kanji && eligible(c))
   if (review) return review
 
-  const learning = data.order.slice(0, record.learningCount)
+  const learning = data.order.slice(0, record.learningCount).filter(eligible)
   const candidates = learning.filter((c) => !recent.includes(c))
-  return weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
+  if (candidates.length > 0) return weightedPick(candidates, (c) => weightOf(record.stats[c]), rng)
+  const beyond = data.order.slice(record.learningCount).find(eligible)
+  return beyond ?? learning[0] ?? data.order[0]
 }
 
 /** 正答率が低いほど重い。まだ出ていない字は最も重い */
@@ -198,6 +230,18 @@ export function answerOdd(
     { correct, missed: false, picked: correct ? undefined : question.odd },
     ms,
   )
+}
+
+/** Lv5 の答え。採点と再出題は Lv1 と同じ */
+export function answerBuild(
+  record: PracticeRecord,
+  data: KanjiData,
+  question: Question,
+  picked: string,
+  ms: number,
+): AnswerOutcome {
+  const correct = picked === question.target
+  return applyAnswer(record, data, 'lv5', question.target, { correct, missed: false, picked: correct ? undefined : picked }, ms)
 }
 
 export type BoardOutcome = AnswerOutcome & {
@@ -333,6 +377,7 @@ export function restoreRecord(saved: unknown): PracticeRecord {
     // Lv3 を持たない以前の記録は、Lv3 を初期状態で始める
     lv3: r.lv3 === undefined ? initialStage(SHOW_TIMES[0]) : restoreStage(r.lv3),
     lv4: r.lv4 === undefined ? initialStage(BOARD_SIZES[0]) : restoreStage(r.lv4),
+    lv5: r.lv5 === undefined ? initialStage(CHOICE_COUNTS[0]) : restoreStage(r.lv5),
   }
 }
 
@@ -373,6 +418,7 @@ function isRecord(v: unknown): boolean {
     (v.lv2 === undefined || isStage(v.lv2, BOARD_SIZES)) &&
     (v.lv3 === undefined || isStage(v.lv3, SHOW_TIMES)) &&
     (v.lv4 === undefined || isStage(v.lv4, BOARD_SIZES)) &&
+    (v.lv5 === undefined || isStage(v.lv5, CHOICE_COUNTS)) &&
     isObject(v.stats) &&
     Object.values(v.stats).every(
       (s) =>

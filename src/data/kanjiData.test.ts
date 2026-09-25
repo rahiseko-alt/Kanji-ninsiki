@@ -43,3 +43,36 @@ describe('出題用データ', () => {
     expect(data.kanji['大'].strokes).toBe(3)
   })
 })
+
+describe('Lv5 の部品', () => {
+  const fontChars = new Set(raw.fontChars)
+
+  it('2つの部品に分かれる字は、部品と並べ方を持つ', () => {
+    expect(data.kanji['侍'].parts).toEqual({ parts: ['亻', '寺'], layout: 'row' })
+    expect(data.kanji['語'].parts).toEqual({ parts: ['言', '吾'], layout: 'row' })
+  })
+
+  it('上下に分かれる字は縦に並べる', () => {
+    const topBottom = data.order.find((c) => data.kanji[c].parts?.layout === 'column')
+    expect(topBottom).toBeDefined()
+  })
+
+  it('部品はすべて同梱フォントにある1文字で、見本自身ではない', () => {
+    for (const c of data.order) {
+      const p = data.kanji[c].parts
+      if (!p) continue
+      for (const part of p.parts) {
+        expect(fontChars.has(part), `${c}: ${part}`).toBe(true)
+        expect(part, c).not.toBe(c)
+      }
+    }
+  })
+
+  it('1500字以上が組み立ての問題に使える', () => {
+    expect(data.order.filter((c) => data.kanji[c].parts).length).toBeGreaterThan(1500)
+  })
+
+  it('2つの部品に分かれない字は部品を持たない', () => {
+    expect(data.kanji['一'].parts).toBeUndefined()
+  })
+})

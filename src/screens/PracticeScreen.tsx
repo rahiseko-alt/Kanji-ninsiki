@@ -2,11 +2,14 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { kanjiData } from '../kanjiData.ts'
 import {
   answer,
+  answerBuild,
   answerFlash,
+  nextBuildQuestion,
   nextFlashQuestion,
   nextQuestion,
   progressOf,
   QUESTIONS_PER_SESSION,
+  type BuildQuestion,
   type FlashQuestion,
   type PracticeRecord,
   type SessionResult,
@@ -16,8 +19,11 @@ import type { KanjiData } from '../data/buildKanjiData.ts'
 import { useMessages } from '../i18n.tsx'
 
 type Props = {
-  /** Lv3「いっしゅん みる」: 見本を表示時間だけ見せてから選択肢を出す */
-  quickLook?: boolean
+  /**
+   * lv1「1つ さがす」、lv3「いっしゅん みる」（見本を表示時間だけ見せてから選択肢を出す）、
+   * lv5「くみたてる」（見本のかわりに部品2つを見せる）
+   */
+  stage: 'lv1' | 'lv3' | 'lv5'
   record: PracticeRecord
   onRecord: (record: PracticeRecord) => void
   /** 練習回の10問目に答えた時点で呼ばれる（結果画面はまだ出さない） */
@@ -29,7 +35,7 @@ type Props = {
 /** 正解のときに次の問題へ移るまでの間 */
 const CORRECT_PAUSE_MS = 500
 
-type AnyQuestion = Question | FlashQuestion
+type AnyQuestion = Question | FlashQuestion | BuildQuestion
 
 /** Lv1 と Lv3 で、問題の作り方と答え方だけを切り替える */
 const modes = {
@@ -42,11 +48,16 @@ const modes = {
     answer: (r: PracticeRecord, d: KanjiData, q: AnyQuestion, c: string, ms: number) =>
       answerFlash(r, d, q, c, ms),
   },
+  lv5: {
+    next: (r: PracticeRecord, d: KanjiData, rng: Rng): AnyQuestion => nextBuildQuestion(r, d, rng),
+    answer: (r: PracticeRecord, d: KanjiData, q: AnyQuestion, c: string, ms: number) =>
+      answerBuild(r, d, q, c, ms),
+  },
 }
 
-export function PracticeScreen({ quickLook = false, record, onRecord, onSessionResult, onShowResult }: Props) {
+export function PracticeScreen({ stage, record, onRecord, onSessionResult, onShowResult }: Props) {
   const m = useMessages()
-  const stage = quickLook ? 'lv3' : 'lv1'
+  const quickLook = stage === 'lv3'
   const mode = modes[stage]
   const [question, setQuestion] = useState<AnyQuestion>(() => mode.next(record, kanjiData, Math.random))
   // Lv3 で見本を見せている間は true（選択肢を隠す）
@@ -125,15 +136,25 @@ export function PracticeScreen({ quickLook = false, record, onRecord, onSessionR
       <p className="progress">
         {questionNumber} / {QUESTIONS_PER_SESSION}
       </p>
-      <p className="instruction">{quickLook ? m.instructionFlash : m.instruction}</p>
+      <p className="instruction">
+        {quickLook ? m.instructionFlash : stage === 'lv5' ? m.instructionBuild : m.instruction}
+      </p>
       {quickLook && (
         <p className="show-time">
           {m.showTime}: {(showMs / 1000).toFixed(1)} {m.seconds}
         </p>
       )}
-      <div className={'target' + (hidden ? ' is-hidden' : '')} lang="ja">
-        {hidden ? '？' : question.target}
-      </div>
+      {'parts' in question ? (
+        <div className={`target parts parts-${question.parts.layout}`} lang="ja">
+          <span>{question.parts.parts[0]}</span>
+          <span className="plus">＋</span>
+          <span>{question.parts.parts[1]}</span>
+        </div>
+      ) : (
+        <div className={'target' + (hidden ? ' is-hidden' : '')} lang="ja">
+          {hidden ? '？' : question.target}
+        </div>
+      )}
       <div className={`choices choices-${question.choices.length}` + (showing ? ' is-concealed' : '')} aria-hidden={showing}>
         {question.choices.map((c, i) => (
           <button

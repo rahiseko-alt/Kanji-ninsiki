@@ -114,7 +114,7 @@ export function App() {
               ) : (
                 <PracticeScreen
                   key={settings.stage}
-                  quickLook={settings.stage === 'lv3'}
+                  stage={settings.stage}
                   record={record}
                   onRecord={updateRecord}
                   onSessionResult={setResult}

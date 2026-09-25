@@ -168,5 +168,11 @@ a { color: var(--accent); }
 @media (max-width: 640px) {
   .stage-switch { display: grid; grid-template-columns: 1fr 1fr; width: calc(100% - 32px); }
   .stage-switch button { padding: 8px 6px; }
+  /* 段階が奇数のときは、最後のボタンを横いっぱいにする */
+  .stage-switch button:last-child:nth-child(odd) { grid-column: span 2; }
   .records .stage-switch { width: 100%; }
 }
+/* Lv5: 部品2つを左右（row）か上下（column）に並べる */
+.target.parts { display: flex; align-items: center; justify-content: center; gap: 12px; font-size: clamp(64px, 20vw, 110px); padding: 8px 0; }
+.target.parts-column { flex-direction: column; gap: 0; line-height: 1.1; }
+.target.parts .plus { font-size: 0.4em; opacity: 0.5; }

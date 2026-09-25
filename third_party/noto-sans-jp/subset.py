@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Noto Sans JP を、常用漢字・かな・英数字・画面の文字だけに絞った woff2 にする。
+"""Noto Sans JP を、常用漢字・Lv5 の部品・かな・英数字・画面の文字だけに絞った woff2 にする。
 
 使い方（fonttools と brotli が必要）:
     pip install fonttools brotli
@@ -30,10 +30,25 @@ joyo = [k["standardForm"] for k in json.loads((root / "third_party/joyo-json/joy
 ui_text = (root / "src" / "i18n.tsx").read_text("utf-8")
 kana = [chr(c) for c in range(0x3040, 0x3100)]  # ひらがな・カタカナ
 ascii_ = [chr(c) for c in range(0x20, 0x7F)]
-punct = list("、。・「」『』（）！？：ー〜％　…")
-chars = sorted(set(joyo) | set(ui_text) | set(kana) | set(ascii_) | set(punct))
+punct = list("、。・「」『』（）！？：ー〜％　…＋")
+
+
+def component_parts():
+    """Lv5 で表示しうる部品（KanjiVG の部品データで、2つに分かれる字の直下の部品）"""
+    kanji = json.loads((root / "third_party/kanjivg/kanjivg-joyo-components.json").read_text("utf-8"))["kanji"]
+    parts = set()
+    for entry in kanji.values():
+        children = entry["t"].get("k") or []
+        if len(children) == 2:
+            parts.update(c["e"] for c in children if c.get("e") and len(c["e"]) == 1)
+    return parts
+
 
 font = TTFont(source)
+# 部品のうち、元のフォントに字形があるものだけを入れる（無いものは Lv5 で出さない）
+available = set(chr(c) for c in font.getBestCmap())
+chars = sorted(set(joyo) | set(ui_text) | set(kana) | set(ascii_) | set(punct) | (component_parts() & available))
+
 font = instancer.instantiateVariableFont(font, {"wght": 400})
 options = subset.Options()
 options.flavor = "woff2"
