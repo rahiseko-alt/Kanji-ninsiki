@@ -179,7 +179,7 @@ export function answerSession(
   } else {
     // 見本と取り違えた字の両方を、間に MIN_GAP 問以上空けて出し直す（取り違えた字は出題範囲の字のときだけ）
     const due = index + MIN_GAP + 1
-    const again = [q.target, ...confused.filter((c) => c !== q.target && session.range.includes(c))]
+    const again = [...new Set([q.target, ...confused.filter((c) => session.range.includes(c))])]
     reviews = [...reviews.filter((r) => !again.includes(r.char)), ...again.map((char) => ({ char, due }))]
   }
 
@@ -267,18 +267,24 @@ function pickTarget(session: Session, data: KanjiData, index: number): string {
   // 出し直し待ちの字は、その時期が来るまで出さない
   const waiting = new Set(session.reviews.map((r) => r.char))
   const chars = session.learning.map((l) => l.char).filter((c) => !waiting.has(c))
-  if (chars.length === 0) return [...session.reviews].sort((a, b) => a.due - b.due)[0].char
+  const fresh = chars.filter(spaced).sort(byAge)[0]
+  if (fresh) return fresh
+  // 学習中の字がみな出し直し待ちなら、間を空けられる出し直しの字を時期の早い順に前倒しする
+  const byDue = [...session.reviews].sort((a, b) => a.due - b.due).map((r) => r.char)
+  const early = byDue.find(spaced)
+  if (early) return early
   // 間を空けられる字が無いとき（出せる字が少ないとき）は、いちばん古い字を出す
-  return (chars.filter(spaced).sort(byAge)[0] ?? [...chars].sort(byAge)[0])!
+  return [...chars, ...byDue].sort(byAge)[0]
 }
 
-/** 似ていない字: 紛らわし字候補に入っていない常用漢字からランダムに */
+/** 似ていない字: 紛らわし字候補に入っていない常用漢字からランダムに（足りなければ紛らわし字候補で埋める） */
 function dissimilarTo(target: string, data: KanjiData, n: number, rng: Rng): string[] {
   const similar = new Set([target, ...data.kanji[target].distractors])
   const picked: string[] = []
-  while (picked.length < n) {
+  for (let tries = 0; picked.length < n && tries < n * 50; tries++) {
     const c = data.order[Math.floor(rng() * data.order.length)]
     if (!similar.has(c) && !picked.includes(c)) picked.push(c)
   }
-  return picked
+  const rest = [...data.order.filter((c) => !similar.has(c) && !picked.includes(c)), ...data.kanji[target].distractors]
+  return [...picked, ...rest.slice(0, n - picked.length)]
 }

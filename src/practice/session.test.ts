@@ -93,6 +93,26 @@ describe('練習回（Lv1）', () => {
     }
   })
 
+  it('学習中の字どうしを取り違え続けても、同じ字は間に2問以上はさむ', () => {
+    // 5字だけの範囲: 学習中の4字が、互いの紛らわし字になる
+    const small = makeData(5)
+    const rng = seededRng(7)
+    let session = startSession(small, 'lv1', 0, rng)
+    const targets: string[] = []
+    for (let i = 0; i < 20; i++) {
+      const q = currentQuestion(session) as ChoiceQuestion
+      targets.push(q.target)
+      const learning = session.learning.map((l) => l.char)
+      const picked =
+        q.choices.find((c) => c !== q.target && learning.includes(c)) ?? q.choices.find((c) => c !== q.target)!
+      session = answerSession(session, small, picked, 900, rng).session
+    }
+    for (let i = 1; i < targets.length; i++) {
+      expect(targets[i], `${i}`).not.toBe(targets[i - 1])
+      if (i >= 2) expect(targets[i], `${i}`).not.toBe(targets[i - 2])
+    }
+  })
+
   it('3回正解した字は外れて、新しい字が入る', () => {
     const { targets } = play(data, () => true)
     const counts = new Map<string, number>()
