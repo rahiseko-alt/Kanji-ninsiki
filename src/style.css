@@ -267,7 +267,7 @@ a { color: var(--accent); }
 
 /* アプリ説明: 文章が下から上へ流れる */
 /* アプリ説明: 1枚のページとして普通にスクロールして読む */
-.intro-roll { max-width: 480px; margin: 0 auto; padding: 64px 24px 140px; text-align: center; }
+.intro-roll { max-width: 480px; margin: 0 auto; padding: 48px 24px 140px; text-align: center; }
 .intro-block { margin: 0 0 56px; }
 .intro-block p { margin: 0; font-size: clamp(18px, 5vw, 22px); line-height: 1.9; letter-spacing: 0.04em; word-break: keep-all; overflow-wrap: anywhere; }
 .intro-block img { display: block; width: min(46vw, 180px); height: auto; margin: 0 auto 10px; }
@@ -285,7 +285,7 @@ a { color: var(--accent); }
 .target, .choice, .compare-char, .cell, .start-card, .stage-switch, .swatch, .danger, .lang-switch { border-radius: 0; }
 .target, .choice, .cell { border-width: 1px; }
 .choice.is-correct { box-shadow: 0 0 0 2px var(--ok); }
-.cell.is-selected { border-color: var(--fg); box-shadow: 0 0 0 2px var(--fg); }
+.cell.is-selected { border-color: transparent; box-shadow: none; background: var(--ink); color: #f4f1ec; }
 /* 墨のボタン（表紙の START と同じ） */
 .next, .ink-button {
   border-radius: 0; background: var(--ink); color: #f4f1ec;
@@ -294,18 +294,18 @@ a { color: var(--accent); }
 .ink-button { justify-content: center; gap: 0; }
 .ink-button .chevron { display: none; }
 @media (prefers-color-scheme: dark) { .next, .ink-button { outline: 1px solid var(--line); } }
-/* 選んでいるものは墨で塗る */
+/* 選んでいるもの（段階・始める位置・盤面の字・下のタブ）は、どれも墨で塗って示す */
 .stage-switch button[aria-pressed='true'] { background: var(--ink); color: #f4f1ec; }
 .start-card { border-color: var(--line); }
-.start-card[aria-checked='true'], .start-card[aria-current='true'] { background: var(--card); border-color: var(--fg); box-shadow: inset 5px 0 0 var(--fg); }
-.start-card[aria-checked='true'] .chevron { color: var(--fg); }
+.start-card[aria-checked='true'], .start-card[aria-current='true'] { background: var(--ink); border-color: transparent; color: #f4f1ec; }
+.start-card[aria-checked='true'] .chevron, .start-card[aria-current='true'] .chevron { color: #f4f1ec; opacity: 0.9; }
 .brush-line { width: 40px; height: 2px; border-radius: 0; background: var(--fg); opacity: 0.5; }
 /* 見出しと下のタブは字間を空ける */
 .home-hero h1, .home-start h2, .records h1, .page h1 { letter-spacing: 0.14em; font-weight: 400; }
 .start-card-name { font-weight: 400; letter-spacing: 0.1em; }
 .tabbar { border-top-color: var(--line); }
 .tabbar button { letter-spacing: 0.12em; }
-.tabbar button[aria-current='page'] { color: var(--fg); border-bottom-color: var(--fg); font-weight: 400; }
+.tabbar button[aria-current='page'] { color: #f4f1ec; background: var(--ink); border-bottom-color: transparent; font-weight: 400; }
 a { color: var(--fg); }
 .trend .line { stroke: var(--fg); }
 .trend .dot { fill: var(--fg); }
