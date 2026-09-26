@@ -1,5 +1,5 @@
 import { APP_NAME, useMessages } from '../i18n.tsx'
-import { START_POSITIONS } from '../practice/practice.ts'
+import { RANGE_STARTS } from '../practice/session.ts'
 import stones from '../assets/cover/stones.webp'
 
 type Props = {
@@ -11,11 +11,8 @@ type Props = {
 /** ホーム: アプリ名、始める位置、モード選択へ進むボタン */
 export function HomeScreen({ startAt, onPractice, onStart }: Props) {
   const m = useMessages()
-  const options: { value: number; name: string }[] = [
-    { value: START_POSITIONS.beginner, name: m.startBeginner },
-    { value: START_POSITIONS.some, name: m.startSome },
-    { value: START_POSITIONS.well, name: m.startWell },
-  ]
+  const names = [m.startBeginner, m.startSome, m.startWell]
+  const options = RANGE_STARTS.map((value, i) => ({ value, name: names[i] }))
   return (
     <main className="home">
       <header className="home-hero">

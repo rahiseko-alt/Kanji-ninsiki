@@ -1,5 +1,5 @@
 import { useMessages } from '../i18n.tsx'
-import type { Stage } from '../practice/practice.ts'
+import type { Stage } from '../practice/session.ts'
 
 type Props = {
   stage: Stage

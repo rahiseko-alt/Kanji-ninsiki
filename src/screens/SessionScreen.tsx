@@ -11,8 +11,8 @@ import {
   type OddQuestion,
   type Session,
   type SessionAnswer,
+  type Stage,
 } from '../practice/session.ts'
-import type { Stage } from '../practice/practice.ts'
 import { useMessages } from '../i18n.tsx'
 import { formatSeconds } from '../format.ts'
 

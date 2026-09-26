@@ -1,8 +1,21 @@
 // 練習回（仕様 rahiseko-alt/Kanji-ninsiki#36）。記録を持たず、1回の練習の中で完結する（ADR-0005）。
 // 画面・保存・時計には触れない。数値の根拠は docs/research/redesign-evidence.md
 import type { KanjiData, Parts } from '../data/buildKanjiData.ts'
-import { shuffle, type Rng } from './question.ts'
-import type { Stage } from './practice.ts'
+
+/** 段階（画面ではモード）。lv1 1つさがす・lv2 ぜんぶさがす・lv3 いっしゅんみる・lv4 ちがうじ・lv5 くみたてる */
+export type Stage = 'lv1' | 'lv2' | 'lv3' | 'lv4' | 'lv5'
+
+/** 0以上1未満を返す乱数 */
+export type Rng = () => number
+
+function shuffle<T>(items: T[], rng: Rng): T[] {
+  const a = [...items]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
 
 /** 同時に練習する字の数（短期記憶の容量 約4: Cowan 2001、習得量 2〜4: Burns & Dean 2005） */
 const LEARNING_SIZE = 4
@@ -17,7 +30,7 @@ const START_STEP = 1
 /** 1回の問題数（約8分: Molloy ら 2012）。盤面の段階は1問に時間がかかるので面の数 */
 const QUESTIONS: Record<Stage, number> = { lv1: 60, lv2: 20, lv3: 60, lv4: 20, lv5: 60 }
 /** 出題範囲の区切り（レベル1〜3の先頭。よく使う順） */
-const RANGE_STARTS = [0, 500, 1000]
+export const RANGE_STARTS = [0, 500, 1000] as const
 /** Lv3 で見本を見せる時間（利用者の指定で固定） */
 const FLASH_MS = 1000
 
