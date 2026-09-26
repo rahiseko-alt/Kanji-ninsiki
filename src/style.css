@@ -317,3 +317,5 @@ a { color: var(--fg); }
 /* ホームの上部: 表紙の石組みを小さく */
 .home-stones { width: min(46vw, 200px); height: auto; margin-top: 28px; }
 .home-start { margin-top: 28px; }
+.result-actions { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 24px; }
+.result-back { background: none; border: 1px solid var(--fg); color: var(--fg); padding: 10px 24px; font-size: 16px; letter-spacing: 0.2em; cursor: pointer; }

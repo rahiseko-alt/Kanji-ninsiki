@@ -95,6 +95,7 @@ const en = {
   introApp:
     'In this app, you practice the "shape-seeing skill" you need before memorizing kanji: looking at kanji, breaking them into parts, and telling them apart.',
   introGoal: 'It is training that builds the basic "kanji-seeing strength" that makes kanji easier to learn.',
+  retry: 'Again',
 }
 
 export type Messages = typeof en
@@ -176,6 +177,7 @@ const ja: Messages = {
   introApp:
     'この アプリでは、かんじを おぼえる まえに ひつような「かたちを みる ちから」を、「みる」「わける」「みわける」 れんしゅうで きたえます。',
   introGoal: 'かんじを もっと まなびやすく する ための「かんじを みる きそたいりょく」を きたえる トレーニングです。',
+  retry: 'もう1かい',
 }
 
 const vi: Messages = {
@@ -255,6 +257,7 @@ const vi: Messages = {
   introApp:
     'Trong ứng dụng này, bạn luyện "khả năng nhìn hình dạng" cần có trước khi ghi nhớ chữ Hán: nhìn, tách và phân biệt chữ Hán.',
   introGoal: 'Đây là bài luyện giúp tăng "sức nền để nhìn chữ Hán", để việc học chữ Hán trở nên dễ hơn.',
+  retry: 'Làm lại',
 }
 
 const ne: Messages = {
@@ -334,6 +337,7 @@ const ne: Messages = {
   introApp:
     'यो एपमा कान्जी कण्ठ गर्नुअघि चाहिने "आकार हेर्ने क्षमता" — हेर्ने, छुट्याउने र चिन्ने — अभ्यास गर्नुहुन्छ।',
   introGoal: 'यो कान्जी सजिलै सिक्नका लागि "कान्जी हेर्ने आधारभूत क्षमता" बलियो बनाउने अभ्यास हो।',
+  retry: 'फेरि गर्नुहोस्',
 }
 
 export const messages: Record<Language, Messages> = { en, ja, vi, ne }

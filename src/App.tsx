@@ -6,6 +6,7 @@ import { HomeScreen } from './screens/HomeScreen.tsx'
 import { PracticeScreen } from './screens/PracticeScreen.tsx'
 import { BoardScreen } from './screens/BoardScreen.tsx'
 import { OddScreen } from './screens/OddScreen.tsx'
+import { SessionScreen } from './screens/SessionScreen.tsx'
 import { CoverScreen } from './screens/CoverScreen.tsx'
 import { IntroScreen } from './screens/IntroScreen.tsx'
 import { ModeScreen } from './screens/ModeScreen.tsx'
@@ -119,7 +120,10 @@ export function App() {
                 ‹ {m.modeTitle}
               </button>
             </div>
-            {result && showResult ? (
+            {settings.stage === 'lv1' ? (
+              // 新しい練習回（記録を持たない。ADR-0005）
+              <SessionScreen key={record.startAt} startAt={record.startAt} onBack={() => goTo('modes')} />
+            ) : result && showResult ? (
               <ResultScreen result={result} onContinue={clearResult} />
             ) : (
               settings.stage === 'lv4' ? (
