@@ -1,6 +1,17 @@
 import { describe, expect, it } from 'vitest'
 import type { KanjiData } from '../data/buildKanjiData.ts'
-import { answerSession, currentQuestion, isFinished, sessionResult, startSession, type Session } from './session.ts'
+import {
+  answerSession,
+  currentQuestion,
+  isEmpty,
+  isFinished,
+  sessionResult,
+  startSession,
+  type BoardQuestion,
+  type ChoiceQuestion,
+  type OddQuestion,
+  type Session,
+} from './session.ts'
 import { seededRng } from './testData.ts'
 
 /** 出題順が length 字の、テスト用の出題用データ。紛らわし字は出題順で近い10字、画数は出題順と逆（後ろほど単純） */
@@ -21,13 +32,17 @@ function makeData(length: number): KanjiData {
 type Play = { targets: string[]; choices: string[][]; session: Session }
 
 /** Lv1 の練習回を、正解するかどうかを決めて最後まで（または n 問）解き進める */
-function play(data: KanjiData, isCorrect: (i: number) => boolean, opts: { startAt?: number; seed?: number; n?: number } = {}): Play {
+function play(
+  data: KanjiData,
+  isCorrect: (i: number) => boolean,
+  opts: { startAt?: number; seed?: number; n?: number; stage?: 'lv1' | 'lv3' | 'lv5' } = {},
+): Play {
   const rng = seededRng(opts.seed ?? 1)
-  let session = startSession(data, 'lv1', opts.startAt ?? 0, rng)
+  let session = startSession(data, opts.stage ?? 'lv1', opts.startAt ?? 0, rng)
   const targets: string[] = []
   const choices: string[][] = []
   for (let i = 0; i < (opts.n ?? Infinity) && !isFinished(session); i++) {
-    const q = currentQuestion(session)!
+    const q = currentQuestion(session) as ChoiceQuestion
     targets.push(q.target)
     choices.push(q.choices)
     const picked = isCorrect(i) ? q.target : q.choices.find((c) => c !== q.target)!
@@ -91,7 +106,7 @@ describe('練習回（Lv1）', () => {
   it('取り違えたら、見本と選んだ字の両方を、間に2問以上空けて近いうちに出し直す', () => {
     const rng = seededRng(3)
     let session = startSession(data, 'lv1', 0, rng)
-    const q = currentQuestion(session)!
+    const q = currentQuestion(session) as ChoiceQuestion
     const picked = q.choices.find((c) => c !== q.target)!
     session = answerSession(session, data, picked, 900, rng).session
     const after: string[] = []
@@ -108,7 +123,7 @@ describe('練習回（Lv1）', () => {
   })
 
   it('やや易しい段（よく似た字の4択）から始まる', () => {
-    const q = currentQuestion(startSession(data, 'lv1', 0, seededRng(1)))!
+    const q = currentQuestion(startSession(data, 'lv1', 0, seededRng(1))) as ChoiceQuestion
     expect(q.choices).toHaveLength(4)
     for (const c of q.choices) if (c !== q.target) expect(data.kanji[q.target].distractors).toContain(c)
   })
@@ -149,5 +164,200 @@ describe('練習回（Lv1）', () => {
     const q = currentQuestion(session)!
     session = answerSession(session, data, q.target, 900, rng).session
     expect(currentQuestion(session)).toMatchObject({ number: 2, total: 60 })
+  })
+})
+
+describe('練習回（Lv3）', () => {
+  it('見本は1秒見せる', () => {
+    const q = currentQuestion(startSession(data, 'lv3', 0, seededRng(1))) as ChoiceQuestion
+    expect(q.showMs).toBe(1000)
+  })
+
+  it('難しさの段は Lv1 と同じく選択肢で上げ下げし、60問で終わる', () => {
+    const { choices } = play(data, () => true, { stage: 'lv3' })
+    expect(choices).toHaveLength(60)
+    expect(choices.slice(0, 9).map((c) => c.length)).toEqual([4, 4, 4, 4, 6, 6, 6, 6, 8])
+  })
+})
+
+describe('練習回（Lv5）', () => {
+  /** 部品に分かれる字だけ parts を持たせる */
+  function withParts(base: KanjiData, has: (i: number) => boolean): KanjiData {
+    return {
+      order: base.order,
+      kanji: Object.fromEntries(
+        base.order.map((c, i) => [
+          c,
+          has(i) ? { ...base.kanji[c], parts: { parts: ['亻', c] as [string, string], layout: 'row' as const } } : base.kanji[c],
+        ]),
+      ),
+    }
+  }
+
+  it('部品に分かれない字は見本に出さず、見本には部品をつける', () => {
+    const d = withParts(data, (i) => i % 2 === 0)
+    const rng = seededRng(4)
+    let s = startSession(d, 'lv5', 0, rng)
+    for (let i = 0; i < 60; i++) {
+      const q = currentQuestion(s) as ChoiceQuestion
+      expect(d.kanji[q.target].parts, q.target).toBeDefined()
+      expect(q.parts).toEqual(d.kanji[q.target].parts)
+      s = answerSession(s, d, i % 3 ? q.target : q.choices.find((c) => c !== q.target)!, 900, rng).session
+    }
+    expect(isFinished(s)).toBe(true)
+  })
+
+  it('出せる字が4字に満たない範囲でも、60問を出し切る', () => {
+    const d = withParts(data, (i) => i === 3 || i === 10)
+    const { targets } = play(d, (i) => i % 4 !== 0, { stage: 'lv5' })
+    expect(targets).toHaveLength(60)
+    expect(new Set(targets)).toEqual(new Set([d.order[3], d.order[10]]))
+  })
+
+  it('範囲に出せる字が1字も無ければ、問題を出さない', () => {
+    const s = startSession(withParts(data, () => false), 'lv5', 0, seededRng(1))
+    expect(isEmpty(s)).toBe(true)
+    expect(currentQuestion(s)).toBeNull()
+  })
+
+  it('取り違えで選んだ字が部品に分かれない字なら、見本だけを出し直す', () => {
+    const d = withParts(data, (i) => i % 2 === 0)
+    const rng = seededRng(2)
+    let s = startSession(d, 'lv5', 0, rng)
+    const q = currentQuestion(s) as ChoiceQuestion
+    const picked = q.choices.find((c) => c !== q.target && d.kanji[c].parts === undefined)
+    if (!picked) return
+    s = answerSession(s, d, picked, 900, rng).session
+    const after: string[] = []
+    for (let i = 0; i < 10; i++) {
+      const next = currentQuestion(s) as ChoiceQuestion
+      after.push(next.target)
+      s = answerSession(s, d, next.target, 900, rng).session
+    }
+    expect(after).not.toContain(picked)
+    expect(after).toContain(q.target)
+  })
+})
+
+describe('練習回（Lv2）', () => {
+  /** 盤面の見本の位置を全部選ぶ（correct=false のときは1つ選び残す） */
+  const answerBoard = (q: BoardQuestion, correct: boolean) => {
+    const all = q.board.flatMap((c, i) => (c === q.target ? [i] : []))
+    return { selected: correct ? all : all.slice(1) }
+  }
+
+  it('盤面は下から2段目の12字から始まり、4面続けて正解すると16字、見落としで下がる', () => {
+    const rng = seededRng(1)
+    let s = startSession(data, 'lv2', 0, rng)
+    const sizes: number[] = []
+    const plan = [true, true, true, true, false, true]
+    for (const ok of plan) {
+      const q = currentQuestion(s) as BoardQuestion
+      sizes.push(q.board.length)
+      s = answerSession(s, data, answerBoard(q, ok), 900, rng).session
+    }
+    sizes.push((currentQuestion(s) as BoardQuestion).board.length)
+    expect(sizes).toEqual([12, 12, 12, 12, 16, 12, 12])
+  })
+
+  it('いちばん易しい段は9字', () => {
+    const rng = seededRng(1)
+    let s = startSession(data, 'lv2', 0, rng)
+    for (let i = 0; i < 2; i++) s = answerSession(s, data, answerBoard(currentQuestion(s) as BoardQuestion, false), 900, rng).session
+    expect((currentQuestion(s) as BoardQuestion).board).toHaveLength(9)
+  })
+
+  it('見落とした見本は、間に2問以上空けて出し直す', () => {
+    const rng = seededRng(6)
+    let s = startSession(data, 'lv2', 0, rng)
+    const q = currentQuestion(s) as BoardQuestion
+    s = answerSession(s, data, answerBoard(q, false), 900, rng).session
+    const after: string[] = []
+    for (let i = 0; i < 6; i++) {
+      const next = currentQuestion(s) as BoardQuestion
+      after.push(next.target)
+      s = answerSession(s, data, answerBoard(next, true), 900, rng).session
+    }
+    expect(after.indexOf(q.target)).toBeGreaterThanOrEqual(2)
+  })
+
+  it('見本でない字を選ぶと誤り', () => {
+    const rng = seededRng(1)
+    const s = startSession(data, 'lv2', 0, rng)
+    const q = currentQuestion(s) as BoardQuestion
+    const all = q.board.flatMap((c, i) => (c === q.target ? [i] : []))
+    const other = q.board.findIndex((c) => c !== q.target)
+    expect(answerSession(s, data, { selected: [...all, other] }, 900, rng).correct).toBe(false)
+  })
+
+  it('20面で終わる', () => {
+    const rng = seededRng(1)
+    let s = startSession(data, 'lv2', 0, rng)
+    let n = 0
+    while (!isFinished(s)) {
+      s = answerSession(s, data, answerBoard(currentQuestion(s) as BoardQuestion, true), 900, rng).session
+      n++
+    }
+    expect(n).toBe(20)
+    expect(sessionResult(s)).toEqual({ correct: 20, total: 20, averageMs: 900 })
+  })
+})
+
+describe('練習回（Lv4）', () => {
+  it('段に従って、仲間はずれの似ている度合いと盤面の字数が変わる', () => {
+    const rng = seededRng(2)
+    let s = startSession(data, 'lv4', 0, rng)
+    const seen: { size: number; close: boolean }[] = []
+    for (let i = 0; i < 13; i++) {
+      const q = currentQuestion(s) as OddQuestion
+      const close = data.kanji[q.target].distractors.slice(0, 3).includes(q.odd)
+      seen.push({ size: q.board.length, close })
+      expect(q.board.filter((c) => c === q.odd)).toHaveLength(1)
+      expect(q.board[q.oddIndex]).toBe(q.odd)
+      s = answerSession(s, data, { index: q.oddIndex }, 900, rng).session
+    }
+    // 下から2段目（少し似た・16）→ よく似た・9 → よく似た・16
+    expect(seen[0]).toEqual({ size: 16, close: false })
+    expect(seen[4]).toEqual({ size: 9, close: true })
+    expect(seen[8]).toEqual({ size: 16, close: true })
+  })
+
+  it('いちばん易しい段は、少し似た仲間はずれの9字', () => {
+    const rng = seededRng(2)
+    let s = startSession(data, 'lv4', 0, rng)
+    const q = currentQuestion(s) as OddQuestion
+    s = answerSession(s, data, { index: (q.oddIndex + 1) % q.board.length }, 900, rng).session
+    const next = currentQuestion(s) as OddQuestion
+    expect(next.board).toHaveLength(9)
+    expect(data.kanji[next.target].distractors.slice(0, 3)).not.toContain(next.odd)
+  })
+
+  it('取り違えたら、並んでいた字と仲間はずれの両方を、間に2問以上空けて出し直す', () => {
+    const rng = seededRng(3)
+    let s = startSession(data, 'lv4', 0, rng)
+    const q = currentQuestion(s) as OddQuestion
+    s = answerSession(s, data, { index: (q.oddIndex + 1) % q.board.length }, 900, rng).session
+    const after: string[] = []
+    for (let i = 0; i < 8; i++) {
+      const next = currentQuestion(s) as OddQuestion
+      after.push(next.target)
+      s = answerSession(s, data, { index: next.oddIndex }, 900, rng).session
+    }
+    for (const c of [q.target, q.odd]) {
+      const at = after.indexOf(c)
+      expect(at, c).toBeGreaterThanOrEqual(2)
+      expect(at, c).toBeLessThan(6)
+    }
+  })
+
+  it('20面で終わる', () => {
+    const rng = seededRng(1)
+    let s = startSession(data, 'lv4', 0, rng)
+    let n = 0
+    while (!isFinished(s)) {
+      s = answerSession(s, data, { index: (currentQuestion(s) as OddQuestion).oddIndex }, 900, rng).session
+      n++
+    }
+    expect(n).toBe(20)
   })
 })

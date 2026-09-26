@@ -1,21 +1,17 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { loadRecord, saveRecord } from './storage.ts'
 import { loadSettings, saveSettings, type Settings } from './settings.ts'
 import { messages, MessagesContext, type Language } from './i18n.tsx'
 import { HomeScreen } from './screens/HomeScreen.tsx'
-import { PracticeScreen } from './screens/PracticeScreen.tsx'
-import { BoardScreen } from './screens/BoardScreen.tsx'
-import { OddScreen } from './screens/OddScreen.tsx'
 import { SessionScreen } from './screens/SessionScreen.tsx'
 import { CoverScreen } from './screens/CoverScreen.tsx'
 import { IntroScreen } from './screens/IntroScreen.tsx'
 import { ModeScreen } from './screens/ModeScreen.tsx'
 import { LanguageSelect } from './screens/LanguageSelect.tsx'
 import { kanjiData } from './kanjiData.ts'
-import { ResultScreen } from './screens/ResultScreen.tsx'
 import { RecordsScreen } from './screens/RecordsScreen.tsx'
 import { CreditsScreen } from './screens/CreditsScreen.tsx'
-import { initialRecord, withStart, type PracticeRecord, type SessionResult, type Stage } from './practice/practice.ts'
+import { initialRecord, withStart, type PracticeRecord, type Stage } from './practice/practice.ts'
 
 // 表紙 → アプリ説明 → ホーム（始める位置）→ モード選択 → 練習
 type Screen = 'cover' | 'intro' | 'home' | 'modes' | 'practice' | 'records' | 'credits'
@@ -23,9 +19,6 @@ type Screen = 'cover' | 'intro' | 'home' | 'modes' | 'practice' | 'records' | 'c
 export function App() {
   const [record, setRecord] = useState<PracticeRecord>(loadRecord)
   const [settings, setSettings] = useState<Settings>(loadSettings)
-  // 練習回の結果。10問目に答えた時点で受け取り、結果画面を閉じるまで持つ
-  const [result, setResult] = useState<SessionResult | null>(null)
-  const [showResult, setShowResult] = useState(false)
   // 開いたときは表紙を出す
   const [screen, setScreen] = useState<Screen>('cover')
   const m = messages[settings.language]
@@ -44,22 +37,8 @@ export function App() {
     setSettings(next)
   }
 
-  const openResult = useCallback(() => setShowResult(true), [])
-  const clearResult = () => {
-    setResult(null)
-    setShowResult(false)
-  }
-  // 10問目のあとで別の画面へ移っても、戻ってきたときに結果画面を出す
-  const goTo = (next: Screen) => {
-    if (next !== screen && result) setShowResult(true)
-    setScreen(next)
-  }
-
-  // 10問目のあとで段階を切り替えても、その練習回の結果画面を出す
-  const chooseStage = (stage: Stage) => {
-    if (result) setShowResult(true)
-    updateSettings({ ...settings, stage })
-  }
+  const goTo = (next: Screen) => setScreen(next)
+  const chooseStage = (stage: Stage) => updateSettings({ ...settings, stage })
 
   // 始める位置の変更は、練習したことがあれば確認のうえ（記録は残る）
   const changeStart = (startAt: number) => {
@@ -108,7 +87,6 @@ export function App() {
             onStart={changeStart}
             onReset={() => {
               updateRecord(initialRecord())
-              clearResult()
             }}
           />
         ) : screen === 'credits' ? (
@@ -120,39 +98,13 @@ export function App() {
                 ‹ {m.modeTitle}
               </button>
             </div>
-            {settings.stage === 'lv1' ? (
-              // 新しい練習回（記録を持たない。ADR-0005）
-              <SessionScreen key={record.startAt} startAt={record.startAt} onBack={() => goTo('modes')} />
-            ) : result && showResult ? (
-              <ResultScreen result={result} onContinue={clearResult} />
-            ) : (
-              settings.stage === 'lv4' ? (
-                <OddScreen
-                  key={settings.stage}
-                  record={record}
-                  onRecord={updateRecord}
-                  onSessionResult={setResult}
-                  onShowResult={openResult}
-                />
-              ) : settings.stage === 'lv2' ? (
-                <BoardScreen
-                  key={settings.stage}
-                  record={record}
-                  onRecord={updateRecord}
-                  onSessionResult={setResult}
-                  onShowResult={openResult}
-                />
-              ) : (
-                <PracticeScreen
-                  key={settings.stage}
-                  stage={settings.stage}
-                  record={record}
-                  onRecord={updateRecord}
-                  onSessionResult={setResult}
-                  onShowResult={openResult}
-                />
-              )
-            )}
+            {/* 練習回（記録を持たない。ADR-0005） */}
+            <SessionScreen
+              key={`${settings.stage}-${record.startAt}`}
+              stage={settings.stage}
+              startAt={record.startAt}
+              onBack={() => goTo('modes')}
+            />
           </>
         )}
         {showTabs && (
