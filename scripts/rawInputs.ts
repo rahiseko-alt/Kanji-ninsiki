@@ -7,13 +7,17 @@ const root = fileURLToPath(new URL('../third_party/', import.meta.url))
 const readJson = (path: string): unknown => JSON.parse(readFileSync(root + path, 'utf8'))
 
 export function readRawInputs(): RawInputs {
-  const joyo = (readJson('joyo-json/joyo_kanji.json') as { standardForm: string }[]).map(
-    (k) => k.standardForm,
+  const joyoTable = readJson('joyo-json/joyo_kanji.json') as { standardForm: string; altForm: string }[]
+  const joyo = joyoTable.map((k) => k.standardForm)
+  // 出現数。許容字体（叱・填・剥・頬）で書かれた分も、通用字体（𠮟・塡・剝・頰）に合算する
+  const counts = new Map<string, number>()
+  for (const line of readFileSync(root + 'kanji-frequency/data/wikipedia_characters.csv', 'utf8').split('\n').slice(2)) {
+    const [, , char, count] = line.split(',')
+    if (char) counts.set(char, Number(count))
+  }
+  const frequency = Object.fromEntries(
+    joyoTable.map((k) => [k.standardForm, (counts.get(k.standardForm) ?? 0) + (k.altForm ? (counts.get(k.altForm) ?? 0) : 0)]),
   )
-  const topoOrder = readFileSync(root + 'topokanji/lists/aozora.txt', 'utf8')
-    .split('\n')
-    .map((l) => l.trim())
-    .filter(Boolean)
   const kanjivg = readJson('kanjivg/kanjivg-joyo-components.json') as {
     kanji: Record<string, { n: number; t: { k?: ComponentNode[] } }>
   }
@@ -22,7 +26,7 @@ export function readRawInputs(): RawInputs {
     (readJson(`kanjidist-visualiser/data/${file}.json`) as { nearest: Distances }).nearest
   return {
     joyo,
-    topoOrder,
+    frequency,
     strokes,
     strokeEdit: nearest('dstrokedit'),
     kanjistat: nearest('dkanjistat'),

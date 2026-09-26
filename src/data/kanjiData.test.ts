@@ -13,8 +13,12 @@ describe('出題用データ', () => {
     for (const c of data.order) expect(joyo.has(c)).toBe(true)
   })
 
-  it('出題順は部品の少ない字から始まる', () => {
-    expect(data.order.slice(0, 3)).toEqual(['人', '一', '口'])
+  it('出題順は文章でよく使われる字から始まる', () => {
+    expect(data.order.slice(0, 3)).toEqual(['年', '日', '月'])
+  })
+
+  it('許容字体で書かれることが多い字（𠮟・塡・剝・頰）も、許容字体の数を合わせて並べる', () => {
+    for (const c of ['𠮟', '塡', '剝', '頰']) expect(data.order.indexOf(c), c).toBeLessThan(2100)
   })
 
   it('すべての字に7字以上の紛らわし字候補がある', () => {

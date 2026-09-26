@@ -13,8 +13,8 @@ import type { KanjiData } from '../data/buildKanjiData.ts'
 import { seededRng, testData } from './testData.ts'
 
 /** 出題順が40字の、テスト用の大きめの出題用データ。部品に分かれる字だけ parts を持たせる */
-function bigData(withParts: (i: number) => boolean): KanjiData {
-  const order = Array.from({ length: 40 }, (_, i) => String.fromCodePoint(0x4e00 + i * 3))
+function bigData(withParts: (i: number) => boolean, length = 40): KanjiData {
+  const order = Array.from({ length }, (_, i) => String.fromCodePoint(0x4e00 + i * 3))
   return {
     order,
     kanji: Object.fromEntries(
@@ -31,8 +31,20 @@ function bigData(withParts: (i: number) => boolean): KanjiData {
 }
 
 describe('始める位置', () => {
-  it('3つの位置は 先頭・200字目・600字目', () => {
-    expect(START_POSITIONS).toEqual({ beginner: 0, some: 200, well: 600 })
+  it('3つの位置（レベル1〜3）は、よく使う順の 先頭・500字目・1000字目', () => {
+    expect(START_POSITIONS).toEqual({ beginner: 0, some: 500, well: 1000 })
+  })
+
+  it('学習中の字は、選んだレベルの範囲（次の区切り）を越えて増えない', () => {
+    const data = bigData(() => false, 1200)
+    let r = { ...withStart(initialRecord(), data, 500), learningCount: 999 }
+    const rng = seededRng(1)
+    for (let i = 0; i < 20; i++) {
+      const q = nextQuestion(r, data, rng)
+      expect(data.order.indexOf(q.target)).toBeLessThan(1000)
+      r = answer(r, data, q, q.target, 900).record
+    }
+    expect(r.learningCount).toBe(1000)
   })
 
   it('始める位置を変えると、学習中の字はその位置からの8字になる', () => {

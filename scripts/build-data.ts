@@ -10,7 +10,7 @@ writeFileSync(
   new URL('kanji-data.json', out),
   JSON.stringify({
     _credits:
-      'Generated from joyo-json (MIT), topokanji (MIT), kanjidist-visualiser (MIT; dkanjistat derived from KanjiVG; dstrokedit from Lars Yencken, CC BY 3.0) and KanjiVG (c) Ulrich Apel, https://kanjivg.tagaini.net/ (stroke counts and the two-part component structure in the parts field; modified data, distributed under CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/). See the Credits screen.',
+      'Generated from joyo-json (MIT), kanji-frequency (CC BY 4.0, https://github.com/scriptin/kanji-frequency), kanjidist-visualiser (MIT; dkanjistat derived from KanjiVG; dstrokedit from Lars Yencken, CC BY 3.0) and KanjiVG (c) Ulrich Apel, https://kanjivg.tagaini.net/ (stroke counts and the two-part component structure in the parts field; modified data, distributed under CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/). See the Credits screen.',
     ...data,
   }),
 )
@@ -25,7 +25,7 @@ const notices: [string, string][] = [
     'kanjivg/COPYING',
   ],
   ['kanjidist-visualiser (https://github.com/lennart-finke/kanjidist-visualiser)', 'kanjidist-visualiser/LICENSE'],
-  ['topokanji (https://github.com/scriptin/topokanji)', 'topokanji/LICENSE'],
+  ['kanji-frequency (https://github.com/scriptin/kanji-frequency) (c) Dmitry Shpika - CC BY 4.0', 'kanji-frequency/LICENSE.txt'],
   ['joyo-json (https://github.com/hoffmannjp/joyo-json)', 'joyo-json/LICENSE'],
   ['Noto Serif JP (subset) - SIL Open Font License 1.1', 'noto-serif-jp/OFL.txt'],
 ]

@@ -25,8 +25,14 @@ const STREAK_TO_RAISE = 5
 /** 練習回でこの数以上正解すると学習中の字が増える（10問中9問 = 8割超） */
 const CORRECT_TO_GROW = 9
 const GROW_BY = 2
-/** 始める位置（出題順の何字目から学習中の字を始めるか） */
-export const START_POSITIONS = { beginner: 0, some: 200, well: 600 } as const
+/** 始める位置＝出題範囲（レベル1〜3）の先頭。よく使う順の上位500字／501〜1000字目／それ以降（docs/research/redesign-evidence.md §6） */
+export const START_POSITIONS = { beginner: 0, some: 500, well: 1000 } as const
+
+/** 始める位置から見た出題範囲の終わり（次の区切り。最後の範囲は出題順の終わり） */
+function rangeEndOf(startAt: number, total: number): number {
+  const next = Object.values(START_POSITIONS).find((p) => p > startAt)
+  return Math.min(next ?? total, total)
+}
 /** 「くみたてる」で、学習中の字に出せる字が足りないときに足してよい、学習中の字の先の字数 */
 const LOOKAHEAD = 20
 
@@ -191,7 +197,8 @@ function learningOf(record: PracticeRecord, data: KanjiData): string[] {
 function poolOf(record: PracticeRecord, data: KanjiData, eligible: (c: string) => boolean): string[] {
   const learning = learningOf(record, data).filter(eligible)
   if (learning.length >= FIRST_LEARNING_COUNT) return learning
-  const ahead = data.order.slice(record.learningCount, record.learningCount + LOOKAHEAD).filter(eligible)
+  const end = Math.min(record.learningCount + LOOKAHEAD, rangeEndOf(record.startAt, data.order.length))
+  const ahead = data.order.slice(record.learningCount, end).filter(eligible)
   return [...learning, ...ahead].slice(0, FIRST_LEARNING_COUNT)
 }
 
@@ -368,7 +375,7 @@ function applyAnswer(
   nextProgress = { ...nextProgress, currentSession: [], sessions: [...nextProgress.sessions, sessionResult] }
   const learningCount =
     sessionResult.correct >= CORRECT_TO_GROW
-      ? Math.min(next.learningCount + GROW_BY, data.order.length)
+      ? Math.min(next.learningCount + GROW_BY, rangeEndOf(next.startAt, data.order.length))
       : next.learningCount
   next = { ...next, learningCount }
   return { record: withProgress(next, stage, nextProgress), correct, sessionResult }
