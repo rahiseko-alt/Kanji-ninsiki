@@ -50,9 +50,14 @@ export function IntroScreen({ onDone }: { onDone: () => void }) {
               )}
             </section>
           ))}
+        {/* 読み終えたら進むボタン（ページの最後） */}
+        <button className="ink-button intro-next" onClick={onDone}>
+          <span>{m.next}</span>
+        </button>
       </div>
-      <button className="ink-button intro-next" onClick={onDone}>
-        <span>{m.next}</span>
+      {/* 途中で飛ばすボタン。スクロールしても画面の右下に残る */}
+      <button className="intro-skip" onClick={onDone}>
+        {m.skip}
       </button>
     </main>
   )

@@ -11,10 +11,10 @@ type Props = {
 /** ホーム: アプリ名、始める位置、モード選択へ進むボタン */
 export function HomeScreen({ startAt, onPractice, onStart }: Props) {
   const m = useMessages()
-  const options: { value: number; name: string; desc: string }[] = [
-    { value: START_POSITIONS.beginner, name: m.startBeginner, desc: m.startDescBeginner },
-    { value: START_POSITIONS.some, name: m.startSome, desc: m.startDescSome },
-    { value: START_POSITIONS.well, name: m.startWell, desc: m.startDescWell },
+  const options: { value: number; name: string }[] = [
+    { value: START_POSITIONS.beginner, name: m.startBeginner },
+    { value: START_POSITIONS.some, name: m.startSome },
+    { value: START_POSITIONS.well, name: m.startWell },
   ]
   return (
     <main className="home">
@@ -25,8 +25,6 @@ export function HomeScreen({ startAt, onPractice, onStart }: Props) {
       </header>
 
       <section className="home-start">
-        <h2>{m.startTitle}</h2>
-        <div className="brush-line" aria-hidden="true" />
         <div className="start-cards" role="radiogroup" aria-label={m.startTitle}>
           {options.map((o) => (
             <button
@@ -38,7 +36,6 @@ export function HomeScreen({ startAt, onPractice, onStart }: Props) {
             >
               <span className="start-card-text">
                 <span className="start-card-name">{o.name}</span>
-                <span className="start-card-desc">{o.desc}</span>
               </span>
               <span className="chevron" aria-hidden="true">
                 ›
@@ -54,8 +51,6 @@ export function HomeScreen({ startAt, onPractice, onStart }: Props) {
           ›
         </span>
       </button>
-      <p className="home-note">{m.readingNote}</p>
-
     </main>
   )
 }
