@@ -267,7 +267,7 @@ a { color: var(--accent); }
 
 /* アプリ説明: 文章が下から上へ流れる */
 /* アプリ説明: 1枚のページとして普通にスクロールして読む */
-.intro-roll { max-width: 480px; margin: 0 auto; padding: 48px 24px 140px; text-align: center; }
+.intro-roll { max-width: 480px; margin: 0 auto; padding: 48px 24px 100px; text-align: center; }
 .intro-block { margin: 0 0 56px; }
 .intro-block p { margin: 0; font-size: clamp(18px, 5vw, 22px); line-height: 1.9; letter-spacing: 0.04em; word-break: keep-all; overflow-wrap: anywhere; }
 .intro-block img { display: block; width: min(46vw, 180px); height: auto; margin: 0 auto 10px; }
@@ -276,7 +276,12 @@ a { color: var(--accent); }
 .intro-glyphs span { font-size: clamp(34px, 10vw, 44px); letter-spacing: 0.3em; line-height: 1.4; }
 .intro-block.is-bullet p { font-weight: 700; }
 .intro-block.is-bullet img { width: min(36vw, 140px); }
-.intro-next { position: fixed; left: 16px; right: 16px; width: auto; max-width: 420px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 5; margin: 0 auto; }
+.intro-next { margin: 8px auto 0; }
+.intro-skip {
+  position: fixed; right: 16px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 5;
+  background: var(--bg); color: var(--fg); border: 1px solid var(--fg); border-radius: 0;
+  padding: 8px 20px; font-size: 15px; letter-spacing: 0.2em; cursor: pointer;
+}
 @media (prefers-color-scheme: dark) {
   .intro-block img { filter: invert(0.9); }
 }
