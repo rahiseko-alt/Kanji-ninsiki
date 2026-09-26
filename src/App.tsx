@@ -10,11 +10,13 @@ import { LanguageSelect } from './screens/LanguageSelect.tsx'
 import { CreditsScreen } from './screens/CreditsScreen.tsx'
 import type { Stage } from './practice/session.ts'
 
-// 表紙 → アプリ説明 → ホーム（始める位置）→ モード選択 → 練習
+// 表紙 → アプリ説明 → ホーム（出題範囲）→ モード選択 → 練習
 type Screen = 'cover' | 'intro' | 'home' | 'modes' | 'practice' | 'credits'
 
 export function App() {
   const [settings, setSettings] = useState<Settings>(loadSettings)
+  // 選んだモードは端末に残さない（ADR-0005）
+  const [stage, setStage] = useState<Stage>('lv1')
   // 開いたときは表紙を出す
   const [screen, setScreen] = useState<Screen>('cover')
   const m = messages[settings.language]
@@ -37,7 +39,6 @@ export function App() {
   }
 
   const goTo = (next: Screen) => setScreen(next)
-  const chooseStage = (stage: Stage) => updateSettings({ ...settings, stage })
 
   const changeStart = (startAt: number) => updateSettings({ ...settings, startAt })
   const changeLanguage = (language: Language) => updateSettings({ ...settings, language })
@@ -48,8 +49,8 @@ export function App() {
     setScreen('home')
   }
 
-  const chooseMode = (stage: Stage) => {
-    chooseStage(stage)
+  const chooseMode = (next: Stage) => {
+    setStage(next)
     goTo('practice')
   }
 
@@ -72,7 +73,7 @@ export function App() {
         ) : screen === 'home' ? (
           <HomeScreen startAt={settings.startAt} onPractice={() => goTo('modes')} onStart={changeStart} />
         ) : screen === 'modes' ? (
-          <ModeScreen stage={settings.stage} onChoose={chooseMode} onBack={() => goTo('home')} />
+          <ModeScreen stage={stage} onChoose={chooseMode} onBack={() => goTo('home')} />
         ) : screen === 'credits' ? (
           <CreditsScreen />
         ) : (
@@ -84,8 +85,8 @@ export function App() {
             </div>
             {/* 練習回（記録を持たない。ADR-0005） */}
             <SessionScreen
-              key={`${settings.stage}-${settings.startAt}`}
-              stage={settings.stage}
+              key={`${stage}-${settings.startAt}`}
+              stage={stage}
               startAt={settings.startAt}
               onBack={() => goTo('modes')}
             />

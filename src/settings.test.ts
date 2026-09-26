@@ -22,12 +22,18 @@ beforeEach(() => {
 
 describe('端末に残す設定（ADR-0005）', () => {
   it('はじめては英語・Lv1・レベル1（先頭から）', () => {
-    expect(loadSettings()).toEqual({ language: 'en', stage: 'lv1', startAt: 0, seenIntro: false })
+    expect(loadSettings()).toEqual({ language: 'en', startAt: 0, seenIntro: false })
   })
 
   it('出題範囲は保存して次に開いたときも同じ', () => {
-    saveSettings({ language: 'ja', stage: 'lv3', startAt: 500, seenIntro: true })
-    expect(loadSettings()).toEqual({ language: 'ja', stage: 'lv3', startAt: 500, seenIntro: true })
+    saveSettings({ language: 'ja', startAt: 500, seenIntro: true })
+    expect(loadSettings()).toEqual({ language: 'ja', startAt: 500, seenIntro: true })
+  })
+
+  it('以前の版が保存した段階（モード）は残さない', () => {
+    storage.setItem(SETTINGS_KEY, JSON.stringify({ language: 'ja', stage: 'lv3', startAt: 500, seenIntro: true }))
+    saveSettings(loadSettings())
+    expect(JSON.parse(storage.getItem(SETTINGS_KEY)!)).toEqual({ language: 'ja', startAt: 500, seenIntro: true })
   })
 
   it('出題範囲はレベル1〜3の先頭（0・500・1000）以外を受けつけない', () => {

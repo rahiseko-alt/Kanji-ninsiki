@@ -256,7 +256,7 @@ a { color: var(--accent); }
 .ink-button { justify-content: center; gap: 0; }
 .ink-button .chevron { display: none; }
 @media (prefers-color-scheme: dark) { .next, .ink-button { outline: 1px solid var(--line); } }
-/* 選んでいるもの（段階・始める位置・盤面の字・下のタブ）は、どれも墨で塗って示す */
+/* 選んでいるもの（出題範囲・モード・盤面の字・下のタブ）は、どれも墨で塗って示す */
 .start-card { border-color: var(--line); }
 .start-card[aria-checked='true'], .start-card[aria-current='true'] { background: var(--ink); border-color: transparent; color: #f4f1ec; }
 .start-card[aria-checked='true'] .chevron, .start-card[aria-current='true'] .chevron { color: #f4f1ec; opacity: 0.9; }

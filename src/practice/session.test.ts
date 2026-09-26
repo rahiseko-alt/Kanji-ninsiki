@@ -12,7 +12,7 @@ import {
   type OddQuestion,
   type Session,
 } from './session.ts'
-import { seededRng } from './testData.ts'
+import { seededRng } from './seededRng.ts'
 
 /** 出題順が length 字の、テスト用の出題用データ。紛らわし字は出題順で近い10字、画数は出題順と逆（後ろほど単純） */
 function makeData(length: number): KanjiData {

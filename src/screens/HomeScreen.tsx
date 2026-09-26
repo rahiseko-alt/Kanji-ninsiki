@@ -8,7 +8,7 @@ type Props = {
   onStart: (startAt: number) => void
 }
 
-/** ホーム: アプリ名、始める位置、モード選択へ進むボタン */
+/** ホーム: アプリ名、出題範囲（レベル1〜3）、モード選択へ進むボタン */
 export function HomeScreen({ startAt, onPractice, onStart }: Props) {
   const m = useMessages()
   const names = [m.startBeginner, m.startSome, m.startWell]
