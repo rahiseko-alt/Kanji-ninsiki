@@ -311,3 +311,4 @@ a { color: var(--fg); }
 .trend .dot { fill: var(--fg); }
 /* ホームの上部: 表紙の石組みを小さく */
 .home-stones { width: min(46vw, 200px); height: auto; margin-top: 28px; }
+.home-start { margin-top: 28px; }
