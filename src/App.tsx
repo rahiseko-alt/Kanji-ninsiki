@@ -95,7 +95,7 @@ export function App() {
         {screen === 'cover' ? (
           <CoverScreen onStart={() => setScreen('intro')} />
         ) : screen === 'intro' ? (
-          <IntroScreen canSkip={settings.seenIntro} onDone={finishIntro} />
+          <IntroScreen onDone={finishIntro} />
         ) : screen === 'home' ? (
           <HomeScreen startAt={record.startAt} onPractice={() => goTo('modes')} onStart={changeStart} />
         ) : screen === 'modes' ? (
