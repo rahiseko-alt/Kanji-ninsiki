@@ -6,7 +6,7 @@ import seal from '../assets/cover/seal.webp'
 export function CoverScreen({ onStart }: { onStart: () => void }) {
   return (
     <main className="cover">
-      <img className="cover-stones" src={stones} alt="" width={720} height={422} />
+      <img className="cover-stones" src={stones} alt="" width={519} height={363} />
       {/* 題字と開発元の印をひと組にして中央に置く。印は題字の字の高さにそろえた正方形（利用者の見本の意匠） */}
       <div className="cover-heading">
         <div className="cover-name">

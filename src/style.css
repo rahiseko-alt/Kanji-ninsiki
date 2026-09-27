@@ -188,10 +188,10 @@ a { color: var(--accent); }
 
 /* 表紙（利用者のデザイン: 石組みの図、認字、NINJI、START） */
 .cover {
-  min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 20vh 24px 8vh;
+  min-height: 100vh; max-width: 480px; margin: 0 auto; padding: 25vh 24px 8vh;
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
-.cover-stones { width: min(78vw, 380px); height: auto; }
+.cover-stones { width: min(54vw, 280px); height: auto; }
 .cover-title { margin: 0; font-size: 1em; font-weight: 400; letter-spacing: 0.12em; line-height: 1.1; }
 .cover-heading {
   display: flex; align-items: flex-start; justify-content: center; margin-top: 7vh;
@@ -202,7 +202,7 @@ a { color: var(--accent); }
 .cover-seal { width: 0.9em; height: 0.9em; margin: 0.15em 0 0 0.2em; flex: none; }
 .cover-reading { margin: 12px 0 0; font-size: clamp(15px, 4.4vw, 19px); letter-spacing: 0.6em; padding-left: 0.6em; }
 .cover-start {
-  margin-top: 9vh; width: min(100%, 280px); padding: 16px 0; padding-left: 0.4em;
+  margin-top: 9vh; width: min(63vw, 300px); padding: 16px 0; padding-left: 0.4em;
   border: 0; cursor: pointer; color: #f4f1ec; font-size: clamp(18px, 5vw, 22px); letter-spacing: 0.4em;
   background: #2b2a29 url('./assets/cover/button.webp') center / cover;
 }
@@ -275,7 +275,7 @@ a { color: var(--fg); }
 .result-actions { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 24px; }
 .result-back { background: none; border: 1px solid var(--fg); color: var(--fg); padding: 10px 24px; font-size: 16px; letter-spacing: 0.2em; cursor: pointer; }
 
-/* ホームと練習中の背景は和紙（利用者の図案）。スマホでも動かないよう、画面に固定した下地として敷く */
+/* 表紙・ホーム・練習中の背景は和紙（利用者の図案）。スマホでも動かないよう、画面に固定した下地として敷く */
 .app.is-paper::before {
   content: ''; position: fixed; inset: 0; z-index: -1;
   background: var(--bg) url('./assets/practice-paper.webp') center / cover no-repeat;

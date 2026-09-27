@@ -16,7 +16,7 @@ export function HomeScreen({ startAt, onChoose }: Props) {
   return (
     <main className="home">
       <header className="home-hero">
-        <img className="home-stones" src={stones} alt="" width={720} height={422} />
+        <img className="home-stones" src={stones} alt="" width={519} height={363} />
         <h1 lang="ja">{APP_NAME}</h1>
         <p className="home-subtitle">{m.appSubtitle}</p>
       </header>

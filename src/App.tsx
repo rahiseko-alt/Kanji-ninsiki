@@ -60,8 +60,8 @@ export function App() {
 
   // 下のバーはホームにだけ出し、クレジットへの入口だけを置く（利用者の見本）
   const showFooter = screen === 'home'
-  // ホームと練習中は白い和紙を敷く
-  const onPaper = screen === 'home' || screen === 'practice'
+  // 表紙・ホーム・練習中は白い和紙を敷く
+  const onPaper = screen === 'cover' || screen === 'home' || screen === 'practice'
 
   return (
     <MessagesContext.Provider value={m}>
