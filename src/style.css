@@ -18,8 +18,8 @@
   --accent: #2e2d2b;
   --accent-soft: #e6e3dd;
   --ink: #2e2d2b url('./assets/cover/button.webp') center / cover;
-  --ok: #1f8a4c;
-  --ng: #c2412d;
+  /* 薄墨: 取り違えた字に使う */
+  --usuzumi: #cdc8bf;
   color-scheme: light dark;
   font-family: 'Noto Serif JP', serif;
 }
@@ -31,8 +31,7 @@
     --line: #3d3a35;
     --accent: #e4e1db;
     --accent-soft: #34322f;
-    --ok: #4cc27f;
-    --ng: #ff7b66;
+    --usuzumi: #4a4640;
   }
 }
 * { box-sizing: border-box; }
@@ -58,8 +57,6 @@ button { font-family: inherit; }
   border-radius: 12px;
   cursor: pointer;
 }
-.choice.is-correct { border-color: var(--ok); box-shadow: 0 0 0 3px var(--ok); }
-.choice.is-wrong { border-color: var(--ng); opacity: 0.7; }
 .feedback { margin-top: 20px; font-size: 20px; }
 .next {
   font-size: 18px;
@@ -91,8 +88,6 @@ button { font-family: inherit; }
   border: 3px solid var(--line);
   border-radius: 14px;
 }
-.compare-char.is-correct { border-color: var(--ok); }
-.compare-char.is-wrong { border-color: var(--ng); }
 .compare figcaption { font-size: 15px; margin-top: 6px; }
 .choices-6 { grid-template-columns: repeat(3, 1fr); }
 .choices-8 { grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -120,17 +115,11 @@ a { color: var(--accent); }
   cursor: pointer;
 }
 .cell.is-selected { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent); }
-.cell.is-found { border-color: var(--ok); background: var(--ok); color: #fff; }
-.cell.is-missed { border-color: var(--ok); border-width: 3px; border-style: dashed; }
-.cell.is-wrong { border-color: var(--ng); background: var(--ng); color: #fff; }
 .cell.is-dim { opacity: 0.45; }
 .next:disabled { opacity: 0.4; cursor: default; }
 .legend { list-style: none; display: flex; justify-content: center; gap: 14px; padding: 0; margin: 0 0 14px; font-size: 14px; flex-wrap: wrap; }
 .legend li { display: flex; align-items: center; gap: 6px; }
 .swatch { display: inline-block; width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--line); }
-.swatch.is-found { background: var(--ok); border-color: var(--ok); }
-.swatch.is-missed { border: 2px dashed var(--ok); }
-.swatch.is-wrong { background: var(--ng); border-color: var(--ng); }
 .target.is-hidden { color: var(--line); }
 .choices.is-concealed { visibility: hidden; }
 /* Lv5: 部品2つを左右（row）か上下（column）に並べる */
@@ -140,7 +129,8 @@ a { color: var(--accent); }
 /* ホーム */
 
 /* 画面全体。下のタブの分だけ余白をとる */
-.app { min-height: 100vh; padding-bottom: 72px; }
+.app { min-height: 100vh; }
+.app.has-tabs { padding-bottom: 72px; }
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
   display: flex; justify-content: space-around;
@@ -246,7 +236,6 @@ a { color: var(--accent); }
 /* ===== 表紙に合わせた全体の見た目: 紙の白、墨の四角、角のない形、字間を空けた明朝 ===== */
 .target, .choice, .compare-char, .cell, .start-card, .swatch, .lang-switch { border-radius: 0; }
 .target, .choice, .cell { border-width: 1px; }
-.choice.is-correct { box-shadow: 0 0 0 2px var(--ok); }
 .cell.is-selected { border-color: transparent; box-shadow: none; background: var(--ink); color: #f4f1ec; }
 /* 墨のボタン（表紙の START と同じ） */
 .next, .ink-button {
@@ -260,6 +249,15 @@ a { color: var(--accent); }
 .start-card { border-color: var(--line); }
 .start-card[aria-checked='true'], .start-card[aria-current='true'] { background: var(--ink); border-color: transparent; color: #f4f1ec; }
 .start-card[aria-checked='true'] .chevron, .start-card[aria-current='true'] .chevron { color: #f4f1ec; opacity: 0.9; }
+/* 答えの正誤も墨で示す（利用者の指示）: 正解・見つけた字は墨で塗る、取り違えた字は薄墨、見落とした字は墨の破線 */
+.choice.is-correct, .cell.is-found, .compare-char.is-correct, .swatch.is-found {
+  background: var(--ink); border-color: transparent; box-shadow: none; color: #f4f1ec; opacity: 1;
+}
+.choice.is-wrong, .cell.is-wrong, .compare-char.is-wrong, .swatch.is-wrong {
+  background: var(--usuzumi); border-color: transparent; box-shadow: none; color: var(--fg); opacity: 1;
+}
+.cell.is-missed, .swatch.is-missed { border: 2px dashed var(--fg); background: var(--card); }
+.choice.is-correct .key { color: #f4f1ec; }
 .brush-line { width: 40px; height: 2px; border-radius: 0; background: var(--fg); opacity: 0.5; }
 /* 見出しと下のタブは字間を空ける */
 .home-hero h1, .home-start h2, .page h1 { letter-spacing: 0.14em; font-weight: 400; }

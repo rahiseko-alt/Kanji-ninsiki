@@ -59,12 +59,13 @@ export function App() {
     ['home', m.navPractice],
     ['credits', m.navCredits],
   ]
-  const activeTab = screen === 'practice' || screen === 'modes' ? 'home' : screen
-  const showTabs = screen !== 'cover' && screen !== 'intro'
+  const activeTab = screen === 'modes' ? 'home' : screen
+  // 表紙・説明・練習中は出さない（練習中は利用者の指示）
+  const showTabs = screen !== 'cover' && screen !== 'intro' && screen !== 'practice'
 
   return (
     <MessagesContext.Provider value={m}>
-      <div lang={settings.language} className="app">
+      <div lang={settings.language} className={'app' + (showTabs ? ' has-tabs' : '')}>
         <LanguageSelect language={settings.language} onChange={changeLanguage} />
         {screen === 'cover' ? (
           <CoverScreen onStart={() => setScreen('intro')} />
