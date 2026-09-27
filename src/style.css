@@ -277,3 +277,12 @@ a { color: var(--fg); }
   content: ''; position: fixed; inset: 0; z-index: -1;
   background: var(--bg) url('./assets/practice-paper.webp') center / cover no-repeat;
 }
+/* 練習中は、カードも塗りも少しだけ透かして和紙を見せる（利用者の指示） */
+.app.is-practice { --card: rgba(251, 250, 247, 0.6); --usuzumi: rgba(205, 200, 191, 0.8); }
+@media (prefers-color-scheme: dark) {
+  .app.is-practice { --card: rgba(37, 35, 32, 0.6); --usuzumi: rgba(74, 70, 64, 0.8); }
+}
+.app.is-practice .choice.is-correct, .app.is-practice .cell.is-found, .app.is-practice .cell.is-selected,
+.app.is-practice .compare-char.is-correct, .app.is-practice .swatch.is-found, .app.is-practice .next:enabled {
+  opacity: 0.88;
+}
