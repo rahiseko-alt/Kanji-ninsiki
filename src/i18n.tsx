@@ -21,9 +21,7 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
 const en = {
   appSubtitle: 'Practice telling kanji apart by their shape',
   navHome: 'Home',
-  startPractice: 'Start practice',
   languageLabel: 'Language',
-  navPractice: 'Practice',
   navCredits: 'Credits',
   instruction: 'Find the same kanji.',
   stageFindOne: 'Find one',
@@ -87,9 +85,7 @@ export type Messages = typeof en
 const ja: Messages = {
   appSubtitle: 'かんじの かたちを みわける',
   navHome: 'ホーム',
-  startPractice: 'はじめる',
   languageLabel: 'ことば',
-  navPractice: 'れんしゅう',
   navCredits: 'クレジット',
   instruction: 'おなじ じを えらぶ',
   stageFindOne: '1つ さがす',
@@ -151,9 +147,7 @@ const ja: Messages = {
 const vi: Messages = {
   appSubtitle: 'Luyện phân biệt chữ Hán qua hình dạng',
   navHome: 'Trang chủ',
-  startPractice: 'Bắt đầu luyện tập',
   languageLabel: 'Ngôn ngữ',
-  navPractice: 'Luyện tập',
   navCredits: 'Nguồn',
   instruction: 'Hãy chọn chữ giống chữ mẫu.',
   stageFindOne: 'Tìm một chữ',
@@ -215,9 +209,7 @@ const vi: Messages = {
 const ne: Messages = {
   appSubtitle: 'कान्जीलाई आकारबाट छुट्याउने अभ्यास',
   navHome: 'गृहपृष्ठ',
-  startPractice: 'अभ्यास सुरु गर्नुहोस्',
   languageLabel: 'भाषा',
-  navPractice: 'अभ्यास',
   navCredits: 'स्रोत',
   instruction: 'नमूनासँग मिल्ने कान्जी छान्नुहोस्।',
   stageFindOne: 'एउटा खोज्नुहोस्',

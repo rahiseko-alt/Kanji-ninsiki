@@ -40,7 +40,11 @@ export function App() {
 
   const goTo = (next: Screen) => setScreen(next)
 
-  const changeStart = (startAt: number) => updateSettings({ ...settings, startAt })
+  // レベル（出題範囲）を選んだら、そのままモード選択へ進む
+  const chooseStart = (startAt: number) => {
+    updateSettings({ ...settings, startAt })
+    goTo('modes')
+  }
   const changeLanguage = (language: Language) => updateSettings({ ...settings, language })
 
   // アプリ説明を最後まで見るか飛ばしたら、次回からは途中で飛ばせる
@@ -54,29 +58,32 @@ export function App() {
     goTo('practice')
   }
 
-  // 下のタブ。「練習」はホーム・モード選択・練習の画面を受け持つ。表紙と説明では出さない
-  const tabs: [Screen, string][] = [
-    ['home', m.navPractice],
-    ['credits', m.navCredits],
-  ]
-  const activeTab = screen === 'modes' ? 'home' : screen
-  // 表紙・説明・練習中は出さない（練習中は利用者の指示）
-  const showTabs = screen !== 'cover' && screen !== 'intro' && screen !== 'practice'
+  // 下のバーはホームにだけ出し、クレジットへの入口だけを置く（利用者の見本）
+  const showFooter = screen === 'home'
+  // ホームと練習中は白い和紙を敷く
+  const onPaper = screen === 'home' || screen === 'practice'
 
   return (
     <MessagesContext.Provider value={m}>
-      <div lang={settings.language} className={'app' + (showTabs ? ' has-tabs' : '') + (screen === 'practice' ? ' is-practice' : '')}>
+      <div lang={settings.language} className={'app' + (showFooter ? ' has-tabs' : '') + (onPaper ? ' is-paper' : '')}>
         <LanguageSelect language={settings.language} onChange={changeLanguage} />
         {screen === 'cover' ? (
           <CoverScreen onStart={() => setScreen('intro')} />
         ) : screen === 'intro' ? (
           <IntroScreen onDone={finishIntro} />
         ) : screen === 'home' ? (
-          <HomeScreen startAt={settings.startAt} onPractice={() => goTo('modes')} onStart={changeStart} />
+          <HomeScreen startAt={settings.startAt} onChoose={chooseStart} />
         ) : screen === 'modes' ? (
           <ModeScreen stage={stage} onChoose={chooseMode} onBack={() => goTo('home')} />
         ) : screen === 'credits' ? (
-          <CreditsScreen />
+          <>
+            <div className="practice-top">
+              <button className="back" onClick={() => goTo('home')}>
+                ‹ {m.navHome}
+              </button>
+            </div>
+            <CreditsScreen />
+          </>
         ) : (
           <>
             <div className="practice-top">
@@ -93,13 +100,9 @@ export function App() {
             />
           </>
         )}
-        {showTabs && (
+        {showFooter && (
           <nav className="tabbar">
-            {tabs.map(([id, label]) => (
-              <button key={id} aria-current={activeTab === id ? 'page' : undefined} onClick={() => goTo(id)}>
-                {label}
-              </button>
-            ))}
+            <button onClick={() => goTo('credits')}>{m.navCredits}</button>
           </nav>
         )}
       </div>
