@@ -65,7 +65,7 @@ export function App() {
 
   return (
     <MessagesContext.Provider value={m}>
-      <div lang={settings.language} className={'app' + (showTabs ? ' has-tabs' : '')}>
+      <div lang={settings.language} className={'app' + (showTabs ? ' has-tabs' : '') + (screen === 'practice' ? ' is-practice' : '')}>
         <LanguageSelect language={settings.language} onChange={changeLanguage} />
         {screen === 'cover' ? (
           <CoverScreen onStart={() => setScreen('intro')} />
