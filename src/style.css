@@ -129,7 +129,8 @@ a { color: var(--accent); }
 /* ホーム */
 
 /* 画面全体。下のタブの分だけ余白をとる */
-.app { min-height: 100vh; padding-bottom: 72px; }
+.app { min-height: 100vh; }
+.app.has-tabs { padding-bottom: 72px; }
 .tabbar {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
   display: flex; justify-content: space-around;
