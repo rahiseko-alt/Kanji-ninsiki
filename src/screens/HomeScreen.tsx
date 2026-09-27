@@ -4,32 +4,31 @@ import stones from '../assets/cover/stones.webp'
 
 type Props = {
   startAt: number
-  onPractice: () => void
-  onStart: (startAt: number) => void
+  /** レベルを選ぶと、そのままモード選択へ進む */
+  onChoose: (startAt: number) => void
 }
 
-/** ホーム: アプリ名、出題範囲（レベル1〜3）、モード選択へ進むボタン */
-export function HomeScreen({ startAt, onPractice, onStart }: Props) {
+/** ホーム: アプリ名と出題範囲（レベル1〜3）。レベルを選ぶとモード選択へ進む */
+export function HomeScreen({ startAt, onChoose }: Props) {
   const m = useMessages()
   const names = [m.startBeginner, m.startSome, m.startWell]
   const options = RANGE_STARTS.map((value, i) => ({ value, name: names[i] }))
   return (
     <main className="home">
       <header className="home-hero">
-        <img className="home-stones" src={stones} alt="" width={720} height={422} />
+        <img className="home-stones" src={stones} alt="" width={519} height={363} />
         <h1 lang="ja">{APP_NAME}</h1>
         <p className="home-subtitle">{m.appSubtitle}</p>
       </header>
 
       <section className="home-start">
-        <div className="start-cards" role="radiogroup" aria-label={m.startTitle}>
+        <nav className="start-cards" aria-label={m.startTitle}>
           {options.map((o) => (
             <button
               key={o.value}
               className="start-card"
-              role="radio"
-              aria-checked={startAt === o.value}
-              onClick={() => onStart(o.value)}
+              aria-current={startAt === o.value ? 'true' : undefined}
+              onClick={() => onChoose(o.value)}
             >
               <span className="start-card-text">
                 <span className="start-card-name">{o.name}</span>
@@ -39,15 +38,8 @@ export function HomeScreen({ startAt, onPractice, onStart }: Props) {
               </span>
             </button>
           ))}
-        </div>
+        </nav>
       </section>
-
-      <button className="ink-button" onClick={onPractice}>
-        <span>{m.startPractice}</span>
-        <span className="chevron" aria-hidden="true">
-          ›
-        </span>
-      </button>
     </main>
   )
 }
