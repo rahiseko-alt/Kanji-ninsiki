@@ -271,3 +271,21 @@ a { color: var(--fg); }
 .home-start { margin-top: 28px; }
 .result-actions { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-top: 24px; }
 .result-back { background: none; border: 1px solid var(--fg); color: var(--fg); padding: 10px 24px; font-size: 16px; letter-spacing: 0.2em; cursor: pointer; }
+
+/* 練習中の背景（利用者の図案）。スマホでも動かないよう、画面に固定した下地として敷く */
+.app.is-practice::before {
+  content: ''; position: fixed; inset: 0; z-index: -1;
+  background: var(--bg) url('./assets/practice-bg.webp') center / cover no-repeat;
+}
+/* 図案の上でも読めるよう、文字は紙の地に載せる */
+.app.is-practice .progress, .app.is-practice .instruction, .app.is-practice .back,
+.app.is-practice .legend, .app.is-practice .compare figcaption, .app.is-practice .empty,
+.app.is-practice .result > * {
+  display: inline-block; background: var(--bg); padding: 4px 12px; opacity: 1;
+}
+.app.is-practice .legend { display: inline-flex; }
+.app.is-practice .result { display: flex; flex-direction: column; align-items: center; }
+/* 押せない「できた」は薄くせず、紙の地に墨の枠で示す */
+.app.is-practice .next:disabled { opacity: 1; background: var(--bg); color: var(--fg); outline: 1px solid var(--line); }
+/* 薄くした字も下地を透かさない（図案が字に重なって見えないように） */
+.app.is-practice .cell.is-dim { opacity: 1; background: var(--card); color: var(--usuzumi); }
