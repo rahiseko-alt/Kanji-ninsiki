@@ -1,11 +1,12 @@
 # 表紙の印（開発元 小齊平 恒平）の画像を作る。使い方: python3 scripts/make-seal.py <NotoSerifJP[wght].ttf>
 # 同梱フォントは使う字だけに絞っていて「齊」が無いため、原本のフォントから画像にして同梱する。
-# 形は利用者の見本どおり: 角の丸い縦長の二重枠、上に小さく「開発元」、その下に縦一列で「小齊平 恒平」
+# 形: 利用者の見本の意匠（角の丸い二重枠・上に小さく「開発元」）を、題字の高さにそろえるため正方形にしたもの。
+# 名前は右の列から縦書きで「小齊平」「恒平」
 import sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
 
 F = sys.argv[1]
-W, H = 200, 672  # 仕上がりの大きさ（表示はこの1/4ほど）
+W = H = 400  # 仕上がりの大きさ（表示はこの1/5ほど）
 S = 4  # なめらかに描くための拡大率
 RED = (178, 36, 30)
 
@@ -19,21 +20,19 @@ def font(px, weight):
 mask = Image.new('L', (W * S, H * S), 0)
 d = ImageDraw.Draw(mask)
 # 外枠（太）と内枠（細）
-d.rounded_rectangle([4 * S, 4 * S, (W - 4) * S, (H - 4) * S], radius=18 * S, outline=255, width=11 * S)
-d.rounded_rectangle([20 * S, 20 * S, (W - 20) * S, (H - 20) * S], radius=8 * S, outline=255, width=3 * S)
-cx = W * S // 2
+d.rounded_rectangle([5 * S, 5 * S, (W - 5) * S, (H - 5) * S], radius=26 * S, outline=255, width=16 * S)
+d.rounded_rectangle([30 * S, 30 * S, (W - 30) * S, (H - 30) * S], radius=10 * S, outline=255, width=4 * S)
 # 上の小さな「開発元」（横書き）
-d.text((cx, 62 * S), '開発元', font=font(30, 800), fill=255, anchor='mm')
-# 縦一列の名前。姓と名のあいだを少し空ける
-big = font(70, 900)
-y = 134
-for c in '小齊平':
-    d.text((cx, y * S), c, font=big, fill=255, anchor='mm')
-    y += 96
-y += 30
-for c in '恒平':
-    d.text((cx, y * S), c, font=big, fill=255, anchor='mm')
-    y += 96
+d.text((W // 2 * S, 84 * S), '開発元', font=font(42, 800), fill=255, anchor='mm')
+# 名前（縦書き2列、右から）
+big = font(72, 900)
+STEP = 80
+for x, chars, top in ((262, '小齊平', 158), (138, '恒平', 158 + STEP // 2)):
+    # 2字の列は3字の列の中ほどにそろえる
+    y = top
+    for c in chars:
+        d.text((x * S, y * S), c, font=big, fill=255, anchor='mm')
+        y += STEP
 mask = mask.resize((W, H), Image.LANCZOS)
 
 
