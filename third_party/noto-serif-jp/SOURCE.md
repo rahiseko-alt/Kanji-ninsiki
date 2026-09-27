@@ -6,3 +6,4 @@
 - ライセンス: SIL Open Font License 1.1（`OFL.txt` は上流の原本）
 - 同梱物: `src/assets/fonts/NotoSerifJP-400.woff2`・`NotoSerifJP-700.woff2`。`subset.py` で絞り、太さを固定したもの。400 は常用漢字・Lv5 の部品・画面の文言（`src/i18n.tsx`）の日本語・かな・英数字・記号、700 は画面の文言の文字だけ（改変版。OFL に従い同じライセンスで配布）。400 に実際に入っている文字の一覧は `NotoSerifJP-subset.chars.txt`
 - 何のために: 利用者が示したデザインどおり、画面の文言と問題に出す漢字を明朝体で表示するため（以前使っていた Noto Sans JP は廃止）
+- 表紙の落款の画像 `src/assets/cover/seal.webp` は、原本の `NotoSerifJP[wght].ttf` から `scripts/make-seal.py` で描いたもの（同梱フォントに「齊」が無いため）
