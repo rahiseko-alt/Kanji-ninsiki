@@ -195,7 +195,14 @@ a { color: var(--accent); }
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
 .cover-stones { width: min(78vw, 380px); height: auto; }
-.cover-title { margin: 7vh 0 0; font-size: clamp(56px, 17vw, 84px); font-weight: 400; letter-spacing: 0.12em; line-height: 1.1; }
+.cover-title { margin: 0; font-size: 1em; font-weight: 400; letter-spacing: 0.12em; line-height: 1.1; }
+.cover-heading {
+  display: flex; align-items: flex-start; justify-content: center; margin-top: 7vh;
+  font-size: clamp(56px, 17vw, 84px);
+}
+.cover-name { display: flex; flex-direction: column; align-items: center; }
+/* 開発元の印: 題字の字の高さにそろえ、題字との間は字の高さの約1/3（題字の字間 0.12em と合わせて） */
+.cover-seal { width: 0.9em; height: 0.9em; margin: 0.15em 0 0 0.2em; flex: none; }
 .cover-reading { margin: 12px 0 0; font-size: clamp(15px, 4.4vw, 19px); letter-spacing: 0.6em; padding-left: 0.6em; }
 .cover-start {
   margin-top: 9vh; width: min(100%, 280px); padding: 16px 0; padding-left: 0.4em;
