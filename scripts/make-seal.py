@@ -1,4 +1,4 @@
-# 表紙の落款（開発元 小齊平 恒平）の画像を作る。使い方: python3 scripts/make-seal.py <NotoSerifJP[wght].ttf>
+# 表紙の落款（小齊平恒平 作）の画像を作る。使い方: python3 scripts/make-seal.py <NotoSerifJP[wght].ttf>
 # 同梱フォントは使う字だけに絞っていて「齊」が無いため、原本のフォントから画像にして同梱する
 import random
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageChops
@@ -15,8 +15,9 @@ m=10*S; bw=18*S
 d.rectangle([m,m,W*S-m,H*S-m],outline=255,width=bw)
 inner_l, inner_r = m+bw+6*S, W*S-m-bw-6*S
 inner_t, inner_b = m+bw+6*S, H*S-m-bw-6*S
-cols=[list('開発元'),list('小齊平'),list('恒平')]
-cw=(inner_r-inner_l)/3
+# 右の列から: 小齊平／恒平作
+cols=[list('小齊平'),list('恒平作')]
+cw=(inner_r-inner_l)/len(cols)
 for ci,chars in enumerate(cols):
     x0=inner_r-cw*(ci+1)
     n=len(chars); ch=(inner_b-inner_t)/n
