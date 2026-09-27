@@ -6,8 +6,8 @@ export type Distances = Record<string, Record<string, number>>
 export type RawInputs = {
   /** 常用漢字2136字 */
   joyo: string[]
-  /** 部品の少ない順の並び（常用漢字以外の部品も含む） */
-  topoOrder: string[]
+  /** 字 → 文章での出現数（kanji-frequency のウィキペディア集計。許容字体の分も合算済み） */
+  frequency: Record<string, number>
   /** 字 → 画数 */
   strokes: Record<string, number>
   /** 画の編集距離（Yencken & Baldwin 2008） */
@@ -72,18 +72,10 @@ function partsOf(c: string, children: ComponentNode[], fontChars: Set<string>): 
   return undefined
 }
 
+/** 文章でよく使われる順（同じ数なら画数の少ない順）。出題範囲の区切りに使う（docs/research/redesign-evidence.md §6） */
 function buildOrder(raw: RawInputs, joyo: Set<string>): string[] {
-  const seen = new Set<string>()
-  const order: string[] = []
-  for (const c of raw.topoOrder) {
-    if (joyo.has(c) && !seen.has(c)) {
-      seen.add(c)
-      order.push(c)
-    }
-  }
-  const rest = raw.joyo.filter((c) => !seen.has(c))
-  rest.sort((a, b) => raw.strokes[a] - raw.strokes[b])
-  return order.concat(rest)
+  const freq = (c: string) => raw.frequency[c] ?? 0
+  return [...joyo].sort((a, b) => freq(b) - freq(a) || raw.strokes[a] - raw.strokes[b])
 }
 
 function distractorsFor(

@@ -22,10 +22,10 @@ const credits: Credit[] = [
     note: 'Distributed via kanjidist-visualiser.',
   },
   {
-    name: 'topokanji © Dmitry Shpika',
-    url: 'https://github.com/scriptin/topokanji',
-    license: 'MIT (chosen from the offered licenses)',
-    note: 'Order of kanji, from simple shapes to complex ones.',
+    name: 'kanji-frequency © Dmitry Shpika',
+    url: 'https://github.com/scriptin/kanji-frequency',
+    license: 'CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)',
+    note: 'Kanji frequency counted from Japanese Wikipedia, used to order kanji from most to least common.',
   },
   {
     name: 'joyo-json © 2021 Benjamin Hoffmann',
