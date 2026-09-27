@@ -195,10 +195,10 @@ a { color: var(--accent); }
   display: flex; flex-direction: column; align-items: center; text-align: center;
 }
 .cover-stones { width: min(78vw, 380px); height: auto; }
-.cover-title { margin: 7vh 0 0; font-size: clamp(56px, 17vw, 84px); font-weight: 400; letter-spacing: 0.12em; line-height: 1.1; }
-.cover-heading { position: relative; }
-/* 落款: 題字の右下に、少し傾けて押したように置く */
-.cover-seal { position: absolute; left: 100%; bottom: -4px; margin-left: 10px; width: clamp(42px, 12vw, 56px); height: auto; }
+.cover-title { margin: 0; font-size: clamp(56px, 17vw, 84px); font-weight: 400; letter-spacing: 0.12em; line-height: 1.1; }
+.cover-heading { position: relative; margin-top: 7vh; }
+/* 開発元の印: 題字の右に、題字と NINJI の高さにそろえて置く */
+.cover-seal { position: absolute; left: 100%; top: 4px; margin-left: 12px; width: clamp(34px, 10vw, 44px); height: auto; }
 .cover-reading { margin: 12px 0 0; font-size: clamp(15px, 4.4vw, 19px); letter-spacing: 0.6em; padding-left: 0.6em; }
 .cover-start {
   margin-top: 9vh; width: min(100%, 280px); padding: 16px 0; padding-left: 0.4em;

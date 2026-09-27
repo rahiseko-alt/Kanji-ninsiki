@@ -11,8 +11,8 @@ export function CoverScreen({ onStart }: { onStart: () => void }) {
         <h1 className="cover-title" lang="ja">
           {APP_NAME}
         </h1>
-        {/* 作者の落款（利用者の指定。朱の縦長の角印「小齊平恒平作」） */}
-        <img className="cover-seal" src={seal} alt="小齊平恒平 作" lang="ja" width={398} height={538} />
+        {/* 開発元の印（利用者の見本どおり、朱の縦長の二重枠） */}
+        <img className="cover-seal" src={seal} alt="開発元 小齊平 恒平" lang="ja" width={200} height={672} />
       </div>
       <p className="cover-reading">NINJI</p>
       <button className="cover-start" onClick={onStart}>
