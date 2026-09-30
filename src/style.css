@@ -301,3 +301,5 @@ a { color: var(--fg); }
 .home:not(.modes) .start-cards { gap: 16px; }
 /* 和紙の上では、下のバーも地を塗らず線だけにする */
 .app.is-paper .tabbar { background: none; }
+/* デーヴァナーガリー・ミャンマー・シンハラ・ベンガル文字は、字間を空けると字の組み立てが崩れて読みにくいので、字間を詰める */
+:lang(ne), :lang(my), :lang(si), :lang(bn) { letter-spacing: normal !important; }
