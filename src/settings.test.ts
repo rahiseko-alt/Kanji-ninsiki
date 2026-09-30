@@ -36,6 +36,13 @@ describe('端末に残す設定（ADR-0005）', () => {
     expect(JSON.parse(storage.getItem(SETTINGS_KEY)!)).toEqual({ language: 'ja', startAt: 500, seenIntro: true })
   })
 
+  it('ミャンマー語・シンハラ語・ベンガル語も表示言語として残る', () => {
+    for (const language of ['my', 'si', 'bn'] as const) {
+      saveSettings({ language, startAt: 0, seenIntro: true })
+      expect(loadSettings().language).toBe(language)
+    }
+  })
+
   it('出題範囲はレベル1〜3の先頭（0・500・1000）以外を受けつけない', () => {
     storage.setItem(SETTINGS_KEY, JSON.stringify({ startAt: 123 }))
     expect(loadSettings().startAt).toBe(0)
